@@ -1,0 +1,9 @@
+node_modules/
+*.apk
+!game/*.apk
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/
+.DS_Store
