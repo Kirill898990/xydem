@@ -26,20 +26,10 @@ android {
     }
 }
 
-// Игра хранится в ../game/index.html (тот же файл открывается в браузере).
-// Перед сборкой оборачиваем её в полноценную HTML-страницу и кладём в assets.
-val prepareGame by tasks.registering {
-    val src = rootProject.file("../game/index.html")
-    val out = file("src/main/assets/index.html")
-    inputs.file(src)
-    outputs.file(out)
-    doLast {
-        out.parentFile.mkdirs()
-        out.writeText(
-            "<!doctype html>\n<html lang=\"ru\">\n<head>\n<meta charset=\"utf-8\">\n" +
-                "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
-                "</head>\n<body>\n" + src.readText() + "\n</body>\n</html>\n"
-        )
-    }
+// Игра хранится в ../docs/game/index.html — тот же файл открывается на сайте (GitHub Pages).
+// Перед сборкой копируем её в assets приложения.
+val prepareGame by tasks.registering(Copy::class) {
+    from(rootProject.file("../docs/game/index.html"))
+    into(layout.projectDirectory.dir("src/main/assets"))
 }
 tasks.named("preBuild") { dependsOn(prepareGame) }

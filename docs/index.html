@@ -1,5 +1,11 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Сайт-визитка проекта учеников 6 класса: выращивание рукколы в эко-боксах и на гидропонике.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e1eedb'/%3E%3Cpath d='M32 54C26 40 18 36 12 30c6-2 12 0 16 4-4-8-4-16 0-24 6 6 6 14 4 20 2-8 8-14 16-16 0 10-6 16-12 20 6-2 12 0 16 4-8 6-14 8-20 16z' fill='%233e8e3a'/%3E%3C/svg%3E">
 <title>Руккола: проект кружка</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@400;600;800&display=swap">
@@ -176,6 +182,8 @@ footer b { color: var(--ink); }
   @keyframes sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
 }
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <nav class="nav" aria-label="Разделы сайта">
@@ -375,18 +383,19 @@ footer b { color: var(--ink); }
       <div class="stack">
         <p class="kicker">Игра для Android</p>
         <h2>«Гидро-огород»</h2>
-        <p>Вырасти рукколу без почвы в эко-боксе на подоконнике обычной квартиры. Растение растёт в реальном времени — даже когда игра закрыта.</p>
+        <p>Выбери, что вырастить без почвы в эко-боксе на подоконнике обычной квартиры: рукколу, кресс-салат, листовой салат, базилик или шпинат. Растение растёт в реальном времени — даже когда игра закрыта.</p>
         <ul>
-          <li>следи за уровнем раствора, pH, концентрацией, светом и температурой;</li>
+          <li>у каждого растения свои настоящие условия: свет, температура, pH и концентрация раствора;</li>
+          <li>следи за уровнем раствора, доливай воду, добавляй удобрение, включай фитолампу;</li>
           <li>отгадывай ребусы и загадки о гидропонике, отвечай на вопросы викторины;</li>
           <li>за листики покупай улучшения: таймер, аэратор, pH-метр, автодолив;</li>
           <li>все советы в игре — настоящие.</li>
         </ul>
         <div class="btns">
-          <a class="btn primary" href="https://claude.ai/artifact/Amb5MoHLtKs1E99JiarGo6" target="_blank" rel="noopener">Играть в браузере</a>
-          <a class="btn secondary" href="https://github.com/Kirill898990/xydem/raw/claude/zealous-franklin-1peppd/apk/gidro-ogorod.apk" target="_blank" rel="noopener">Скачать APK для Android</a>
+          <a class="btn primary" href="gidro-ogorod.apk" download="gidro-ogorod.apk">Скачать для Android (APK)</a>
+          <a class="btn secondary" href="game/">Играть в браузере</a>
         </div>
-        <p class="note" style="color:#cfe0c6">Перед установкой APK разреши в настройках телефона установку из этого источника.</p>
+        <p class="note" style="color:#cfe0c6">Android 8.0 и новее, размер меньше 100 КБ. Как установить: скачай файл, открой его и разреши телефону установку из этого источника. На компьютере и iPhone играй в браузере.</p>
       </div>
       <div class="phone" aria-hidden="true"><canvas id="mini" width="220" height="440"></canvas></div>
     </div>
@@ -396,6 +405,7 @@ footer b { color: var(--ink); }
     <p><b>Проект «Выращивание рукколы в эко-боксах в условиях школьного кружка»</b></p>
     <p>Ученики 6 класса · Республиканская научно-практическая конференция «АгроБудущее: идеи школьников», 2026</p>
     <p>Источники: USDA FoodData Central; МР 2.3.1.0253-21; B. A. Kratky, Acta Horticulturae, 2009; W. F. Gericke, 1940.</p>
+    <p><a href="https://github.com/Kirill898990/xydem">Исходный код сайта и игры на GitHub</a></p>
   </footer>
 </div>
 
@@ -448,3 +458,5 @@ footer b { color: var(--ink); }
   if (!reduce) setInterval(() => { g += 0.01; if (g > 1) g = 0.1; draw(); }, 120);
 })();
 </script>
+</body>
+</html>
