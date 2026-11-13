@@ -1,5 +1,11 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Игра «Гидро-огород»: вырасти растения без почвы на гидропонике в реальном времени.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e1eedb'/%3E%3Cpath d='M32 54C26 40 18 36 12 30c6-2 12 0 16 4-4-8-4-16 0-24 6 6 6 14 4 20 2-8 8-14 16-16 0 10-6 16-12 20 6-2 12 0 16 4-8 6-14 8-20 16z' fill='%233e8e3a'/%3E%3C/svg%3E">
 <title>Гидро-огород</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#e7ece3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -138,6 +144,25 @@ h3 { font: 700 15px/1.25 var(--font-display); margin: 0; text-wrap: balance; }
 .btn.ghost { background: var(--leaf-soft); color: var(--leaf-deep); }
 .btn.violet { background: var(--violet); }
 .btn[disabled] { opacity: .5; cursor: default; }
+.btn.small { padding: 6px 10px; font-size: 13px; }
+.plant-name { font-weight: 800; color: var(--leaf-deep); }
+.plant-name i { font-weight: 500; color: var(--muted); font-size: 13px; }
+.picker { display: grid; gap: 8px; }
+.pick {
+  position: relative; display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; align-items: start;
+  text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 10px;
+}
+.pick:hover { border-color: var(--leaf); }
+.pick.current { border-color: var(--leaf); background: var(--leaf-soft); }
+.pick img { width: 70px; height: 55px; object-fit: contain; background: var(--leaf-soft); border-radius: 10px; }
+.pick-body { display: grid; gap: 2px; min-width: 0; }
+.pick-body b { font: 700 15px/1.25 var(--font-display); color: var(--leaf-deep); padding-right: 86px; }
+.pick-body i { font-size: 12px; color: var(--muted); }
+.pick-about { font-size: 13px; line-height: 1.35; }
+.pick-params { font-size: 12px; color: var(--muted); line-height: 1.35; font-variant-numeric: tabular-nums; }
+.pick .lvl { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 800; border-radius: 99px; padding: 2px 8px; background: var(--leaf-soft); color: var(--leaf-deep); }
+.pick .lvl.mid { background: var(--warn-soft); color: var(--warn); }
+.pick .lvl.hard { background: var(--bad-soft); color: var(--bad); }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
 .muted { color: var(--muted); font-size: 13px; }
 .done-badge { font-size: 12px; font-weight: 800; color: var(--leaf-deep); background: var(--leaf-soft); border-radius: 99px; padding: 2px 9px; }
@@ -205,10 +230,12 @@ h3 { font: 700 15px/1.25 var(--font-display); margin: 0; text-wrap: balance; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
+</head>
+<body>
 
 <div class="app" id="app">
   <header class="top">
-    <div class="brand">Гидро-огород<small id="subtitle">Руккола без почвы</small></div>
+    <div class="brand">Гидро-огород<small id="subtitle">Зелень без почвы</small></div>
     <div class="coins" id="coins" title="Листики — награда за задания"></div>
   </header>
 
@@ -216,11 +243,15 @@ h3 { font: 700 15px/1.25 var(--font-display); margin: 0; text-wrap: balance; }
     <!-- ОГОРОД -->
     <section class="view" id="view-garden" aria-label="Огород">
       <div class="scene-wrap">
-        <canvas id="scene" width="800" height="580" aria-label="Эко-бокс с рукколой на подоконнике"></canvas>
+        <canvas id="scene" width="800" height="580" aria-label="Эко-бокс с растениями на подоконнике"></canvas>
         <div class="clock-pill" id="clock"></div>
         <div class="clock-pill speed-pill" id="speedPill" hidden></div>
       </div>
       <div class="status">
+        <div class="status-row">
+          <span class="plant-name" id="plantName"></span>
+          <button class="btn ghost small" data-act="pick">Сменить растение</button>
+        </div>
         <div class="status-row">
           <div class="stage" id="stage"></div>
           <div class="facts" id="facts"></div>
@@ -270,8 +301,8 @@ h3 { font: 700 15px/1.25 var(--font-display); margin: 0; text-wrap: balance; }
       </div>
       <div class="card">
         <h3>О проекте</h3>
-        <p class="muted" style="margin:0">Игра сделана учениками 6 класса в рамках проекта «Выращивание рукколы в эко-боксах в условиях школьного кружка». Все советы в игре настоящие: так выращивают зелень методом Кратки — без насосов и без почвы.</p>
-        <p style="margin:0"><a href="https://claude.ai/artifact/1ZhsEctqRTHtfVB5sSG8T1" target="_blank" rel="noopener" style="color:var(--leaf-deep);font-weight:700">Сайт проекта о рукколе</a></p>
+        <p class="muted" style="margin:0">Игра сделана учениками 6 класса в рамках проекта «Выращивание рукколы в эко-боксах в условиях школьного кружка». Все советы и параметры растений в игре настоящие: так выращивают зелень методом Кратки — без насосов и без почвы.</p>
+        <p style="margin:0"><a href="https://kirill898990.github.io/xydem/" target="_blank" rel="noopener" style="color:var(--leaf-deep);font-weight:700">Сайт проекта: kirill898990.github.io/xydem</a></p>
         <div class="row">
           <button class="btn ghost" id="howBtn">Как играть</button>
           <button class="btn ghost" id="resetBtn" style="color:var(--bad)">Начать игру заново</button>
@@ -321,21 +352,109 @@ const TANK = 3.0;              // объём бака, л
 const STEP_H = 1 / 6;          // шаг модели — 10 игровых минут
 const MAX_CATCHUP = 10 * DAY;  // догоняем не больше 10 игровых дней
 const KEY = 'hydro-garden-v1';
+const SITE_URL = 'https://kirill898990.github.io/xydem/';
 const SPEEDS = [
-  { v: 1, name: 'Реальное время', hint: '1 игровой день = 1 настоящий день. Как в жизни: урожай примерно через 25 дней.' },
-  { v: 24, name: 'Быстро', hint: '1 игровой день = 1 час. Урожай за один день игры.' },
+  { v: 1, name: 'Реальное время', hint: '1 игровой день = 1 настоящий день. Как в жизни: урожай через 2–6 недель, смотря что посадить.' },
+  { v: 24, name: 'Быстро', hint: '1 игровой день = 1 час. Руккола вырастет примерно за сутки игры.' },
   { v: 1440, name: 'Демонстрация', hint: '1 игровой день = 1 минута. Для показа на уроке или конференции.' },
 ];
-const STAGES = [
-  { at: 0, name: 'Семена в субстрате' },
-  { at: 4, name: 'Проклюнулся корешок' },
-  { at: 10, name: 'Всходы: семядоли' },
-  { at: 20, name: 'Первый настоящий лист' },
-  { at: 35, name: 'Розетка из 4–6 листьев' },
-  { at: 60, name: 'Густая розетка' },
-  { at: 75, name: 'Можно срезать листья' },
-  { at: 100, name: 'Полный урожай' },
-];
+
+// Растения и их настоящие параметры для гидропоники
+const PLANTS = {
+  arugula: {
+    name: 'Руккола', gen: 'рукколы', latin: 'Eruca sativa', level: 'Легко',
+    days: 25, germ: 3, temp: [16, 20], hot: 25, cold: 10, ph: [6.0, 6.8], ec: [0.8, 1.6], ecSeed: [0.4, 1.0],
+    light: [12, 14], longDay: 18, maxH: 18, cuts: 3, yield: 120, look: 'arugula', color: '4f9a3c', flower: 'f2e8b8',
+    stages: ['Розетка из 4–6 листьев', 'Густая розетка'],
+    about: 'Пряные листья с горчинкой. Растёт быстро и любит прохладу.',
+    boltTitle: 'Руккола пошла в стрелку',
+    cutText: 'Срежь внешние листья ножницами, а сердцевину оставь — руккола отрастёт ещё.',
+    tips: [
+      'Руккола — родственница капусты и редиса, родом из Средиземноморья.',
+      'Лучшая температура +16…+20 °С. В жару руккола выпускает цветонос, и листья горчат.',
+      'pH раствора 6,0–6,8, концентрация (EC) 0,8–1,6 мСм/см.',
+      'Срезай внешние листья — руккола отрастёт и даст урожай ещё 1–2 раза.',
+    ],
+  },
+  cress: {
+    name: 'Кресс-салат', gen: 'кресс-салата', latin: 'Lepidium sativum', level: 'Очень легко',
+    days: 14, germ: 2, temp: [15, 20], hot: 25, cold: 8, ph: [6.0, 6.5], ec: [0.4, 1.0], ecSeed: [0.2, 0.8],
+    light: [12, 14], longDay: 18, maxH: 10, cuts: 1, yield: 60, look: 'cress', color: '5aa83f', flower: 'ffffff',
+    stages: ['Щёточка всходов', 'Густая щёточка'],
+    about: 'Самый быстрый урожай — через две недели. Срезают один раз.',
+    boltTitle: 'Кресс-салат зацвёл',
+    cutText: 'Срежь кресс-салат ножницами над субстратом. Он не отрастает — после среза посади что-нибудь новое.',
+    tips: [
+      'Кресс-салат — самый скороспелый: урожай через 10–14 дней.',
+      'Его срезают один раз: после среза он не отрастает.',
+      'Кресс-салат можно вырастить даже на влажной бумаге — ему хватает слабого раствора.',
+      'Острый вкус кресс-салата похож на горчичный: они родственники из семейства Капустные.',
+    ],
+  },
+  lettuce: {
+    name: 'Салат листовой', gen: 'салата', latin: 'Lactuca sativa', level: 'Легко',
+    days: 35, germ: 3, temp: [15, 20], hot: 24, cold: 8, ph: [5.5, 6.5], ec: [0.8, 1.2], ecSeed: [0.4, 0.8],
+    light: [12, 16], longDay: 18, maxH: 20, cuts: 3, yield: 180, look: 'lettuce', color: '7fbf48', flower: 'f3dc55',
+    stages: ['Розетка из 4–6 листьев', 'Пышная розетка'],
+    about: 'Главное растение гидропоники: метод Кратки испытывали на салате.',
+    boltTitle: 'Салат пошёл в стрелку',
+    cutText: 'Срезай внешние листья, а сердцевину оставь — салат продолжит расти.',
+    tips: [
+      'Учёный Бернард Кратки испытывал свой метод без насосов на салате-латуке.',
+      'Салат любит прохладу +15…+20 °С. В жару листья горчат, а растение вытягивается в стрелку.',
+      'Раствор нужен слабый: EC 0,8–1,2 мСм/см, pH 5,5–6,5.',
+      'Листовой салат срезают по внешним листьям — сердцевина продолжает расти.',
+    ],
+  },
+  basil: {
+    name: 'Базилик', gen: 'базилика', latin: 'Ocimum basilicum', level: 'Средне',
+    days: 45, germ: 6, temp: [22, 28], hot: 32, cold: 15, ph: [5.5, 6.5], ec: [1.0, 1.6], ecSeed: [0.5, 1.0],
+    light: [14, 16], longDay: 20, maxH: 25, cuts: 4, yield: 90, look: 'basil', color: '3f8f3a', flower: 'ffffff',
+    stages: ['Две пары листьев', 'Ветвистый кустик'],
+    about: 'Ароматная пряность из жарких стран. Любит тепло и много света.',
+    boltTitle: 'Базилик зацвёл',
+    cutText: 'Прищипни верхушки над второй парой листьев — базилик станет ветвистее и отрастёт.',
+    tips: [
+      'Базилик родом из Индии и любит тепло: +22…+28 °С. Ниже +15 °С листья желтеют.',
+      'Ему нужно 14–16 часов света в сутки.',
+      'Прищипывай верхушку над 2–3 парой листьев — куст станет пышным и ветвистым.',
+      'Удаляй цветоносы: после цветения листья становятся жёсткими.',
+      'pH раствора 5,5–6,5, концентрация (EC) 1,0–1,6 мСм/см.',
+    ],
+  },
+  spinach: {
+    name: 'Шпинат', gen: 'шпината', latin: 'Spinacia oleracea', level: 'Сложно',
+    days: 40, germ: 5, temp: [15, 20], hot: 24, cold: 5, ph: [6.0, 7.0], ec: [1.8, 2.3], ecSeed: [0.8, 1.4],
+    light: [10, 12], longDay: 14, maxH: 20, cuts: 2, yield: 140, look: 'spinach', color: '2f6f2a', flower: 'c9d98a',
+    stages: ['Розетка из 4–6 листьев', 'Крупные листья'],
+    about: 'Растение короткого дня: при длинном дне быстро зацветает. Нужен крепкий раствор.',
+    boltTitle: 'Шпинат пошёл в стрелку',
+    cutText: 'Срежь крупные внешние листья у основания — шпинат даст ещё один урожай.',
+    tips: [
+      'Шпинат — растение короткого дня: если светить больше 14 часов, он быстро зацветёт.',
+      'Любит прохладу +15…+20 °С.',
+      'Ему нужен более крепкий раствор: EC 1,8–2,3 мСм/см, pH 6,0–7,0.',
+      'В шпинате много витамина K, фолатов и магния.',
+    ],
+  },
+};
+const PLANT_ORDER = ['arugula', 'cress', 'lettuce', 'basil', 'spinach'];
+const P = () => PLANTS[S.plantType] || PLANTS.arugula;
+const range = (a, d = 1) => `${fmt(a[0], d)}–${fmt(a[1], d)}`;
+const tRange = (a) => `+${a[0]}…+${a[1]} °С`;
+const dayWord = (n) => (n % 10 === 1 && n % 100 !== 11 ? 'день' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'дня' : 'дней');
+function stagesOf(pl) {
+  return [
+    { at: 0, name: 'Семена в субстрате' },
+    { at: 4, name: 'Проклюнулся корешок' },
+    { at: 10, name: 'Всходы: семядоли' },
+    { at: 20, name: 'Первый настоящий лист' },
+    { at: 35, name: pl.stages[0] },
+    { at: 60, name: pl.stages[1] },
+    { at: 75, name: 'Можно собирать урожай' },
+    { at: 100, name: 'Полный урожай' },
+  ];
+}
 
 // ===================== СОСТОЯНИЕ =====================
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -347,21 +466,26 @@ function newState(now) {
   return {
     v: 1, speed: 1, gameTime: now, lastReal: now,
     coins: 10,
-    plant: freshPlant(now),
+    plantType: 'arugula', plant: freshPlant(now),
     water: 2.7, nutrients: 2.7 * 0.6, ph: 6.3,
     lampOn: false, lightToday: 0, lightYesterday: 14,
-    heatUntil: 0, ventUntil: 0, goodDays: 0,
+    heatUntil: 0, ventUntil: 0, goodDays: 0, onShelf: false,
     upgrades: {}, solved: {}, hints: {}, ach: {},
-    log: [], bonusDay: null, seenIntro: false,
-    stats: { grams: 0, harvests: 0, cycles: 1, tasks: 0 },
+    log: [], bonusDay: null, seenIntro: false, picked: false,
+    stats: { grams: 0, harvests: 0, cycles: 1, tasks: 0, kinds: {} },
   };
 }
 let S;
-function load(snapshot) {
-  if (snapshot && snapshot.v === 1) return snapshot;
+function migrate(s) {
+  if (!PLANTS[s.plantType]) s.plantType = 'arugula';
+  if (s.onShelf === undefined) s.onShelf = !!(s.upgrades && s.upgrades.shelf);
+  if (!s.stats.kinds) s.stats.kinds = {};
+  return s;
+}
+function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1) return s; }
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1) return migrate(s); }
   } catch (e) { /* хранилище недоступно — начнём заново */ }
   return newState(Date.now());
 }
@@ -379,56 +503,93 @@ const minFill = () => 0.82 - 0.62 * rootDev();
 const maxFill = () => 0.97 - 0.32 * rootDev();
 const leafArea = () => clamp((S.plant.growth - 8) / 80, 0, 1);
 const lampAuto = () => !!S.upgrades.timer || S.speed > 1;
+const lampHours = () => P().light[1];
 function lampIsOn(t) {
-  if (lampAuto()) { const h = hourOf(t); return h >= 7 && h < 21; }
+  if (lampAuto()) { const h = hourOf(t); return h >= 7 && h < 7 + lampHours(); }
   return S.lampOn;
 }
-function naturalLight(t) {
+function naturalLightAt(h) {
   // ноябрь в Казани: светло примерно с 8 до 16 часов, через стекло света мало
-  const h = hourOf(t);
   return h < 8 || h >= 16 ? 0 : 0.3 * Math.sin(Math.PI * (h - 8) / 8);
 }
+const naturalLight = (t) => naturalLightAt(hourOf(t));
 function lampPower() { return (S.upgrades.led ? 1.2 : 1.0) * (S.upgrades.reflector ? 1.1 : 1); }
 function lightNow(t) { return (lampIsOn(t) ? lampPower() : 0) + naturalLight(t); }
+// Скорость роста подобрана так, чтобы при хорошем уходе урожай поспевал за настоящее число дней
+const KCACHE = {};
+function growthK(id) {
+  if (KCACHE[id]) return KCACHE[id];
+  const pl = PLANTS[id];
+  let li = 0;
+  for (let h = 0; h < 24; h += 0.1) {
+    const lamp = h >= 7 && h < 7 + pl.light[1] ? 1 : 0;
+    li += Math.min(lamp + naturalLightAt(h), 1.2) * 0.1;
+  }
+  return (KCACHE[id] = 90 / ((pl.days - pl.germ) * li));
+}
 function tempNow(t) {
   const h = hourOf(t);
   let T = 20 + 2 * clamp(Math.sin(Math.PI * (h - 6) / 16), 0, 1);
-  if (!S.upgrades.shelf) T += 2;
+  if (!(S.upgrades.shelf && S.onShelf)) T += 2;
   if (t < S.heatUntil) T += 2.5;
   if (S.upgrades.fan) T -= 1;
   if (lampIsOn(t)) T += 0.5;
   if (t < S.ventUntil) T -= 4;
   return T;
 }
-function ecRange() { return S.plant.growth < 20 ? [0.4, 1.0] : [0.8, 1.6]; }
+function ecRange() { return S.plant.growth < 20 ? P().ecSeed : P().ec; }
 function tempFactor(T) {
-  if (T < 12) return 0.4; if (T < 16) return 0.8; if (T <= 21) return 1;
-  if (T <= 24) return 0.9; if (T <= 26) return 0.75; return 0.55;
+  const pl = P(), [lo, hi] = pl.temp;
+  if (T >= lo && T <= hi) return 1;
+  if (T > hi) return T <= hi + 3 ? 0.9 : T <= pl.hot ? 0.75 : 0.55;
+  return T >= lo - 3 ? 0.85 : T >= pl.cold ? 0.65 : 0.4;
+}
+// Отклонения: 0 — норма, 1 — немного не так, 2 — плохо (знак: + много, − мало)
+function phLevel() {
+  const [lo, hi] = P().ph, v = S.ph;
+  if (v < lo - 0.9 || v > hi + 0.7) return 2;
+  if (v < lo - 0.3 || v > hi + 0.3) return 1;
+  return 0;
+}
+function ecLevel() {
+  const e = ec(), [lo, hi] = ecRange(), g = S.plant.growth;
+  if (e > hi + 0.9) return 2;
+  if (e > hi) return 1;
+  if (g > 15 && e < lo - 0.3) return -2;
+  if (g > 15 && e < lo) return -1;
+  return 0;
+}
+function tempLevel(T) {
+  const pl = P();
+  if (T > pl.hot) return 2;
+  if (T > pl.temp[1] + 2) return 1;
+  if (T < pl.cold) return -2;
+  if (T < pl.temp[0] - 2) return -1;
+  return 0;
 }
 
 // Текущие проблемы растения (используются и моделью, и подсказками)
 function problems(t) {
-  const p = S.plant, out = [];
+  const p = S.plant, pl = P(), out = [];
   if (p.dead) return [{ k: 'dead', sev: 3, stress: 0 }];
+  if (p.exhausted) return [];
   const f = fill(), lo = minFill(), hi = maxFill();
   if (S.water < 0.08) out.push({ k: 'empty', sev: 3, stress: 3 });
   else if (f < lo) out.push({ k: 'low', sev: 2, stress: 0.5 + (lo - f) * 4 });
   if (f > hi + 0.02 && p.growth > 12 && !S.upgrades.aerator) out.push({ k: 'overfill', sev: 2, stress: 0.8 });
-  const ph = S.ph;
-  if (ph < 5.0) out.push({ k: 'phLow', sev: 2, stress: 1.0 });
-  else if (ph > 7.5) out.push({ k: 'phHigh', sev: 2, stress: 1.0 });
-  else if (ph < 5.6) out.push({ k: 'phLow', sev: 1, stress: 0.3 });
-  else if (ph > 7.0) out.push({ k: 'phHigh', sev: 1, stress: 0.3 });
-  const e = ec(), [eLo, eHi] = ecRange();
-  if (e > eHi + 0.9) out.push({ k: 'ecHigh', sev: 2, stress: 1.2 });
-  else if (e > eHi) out.push({ k: 'ecHigh', sev: 1, stress: 0.3 });
-  else if (p.growth > 15 && e < eLo - 0.3) out.push({ k: 'ecLow', sev: 2, stress: 0.6 });
-  else if (p.growth > 15 && e < eLo) out.push({ k: 'ecLow', sev: 1, stress: 0.15 });
-  const T = tempNow(t);
-  if (T > 26) out.push({ k: 'hot', sev: 2, stress: 0.6 });
-  else if (T > 24) out.push({ k: 'warm', sev: 1, stress: 0.05 });
-  if (T < 12) out.push({ k: 'cold', sev: 1, stress: 0.3 });
-  if (p.growth >= 10 && S.lightYesterday < 9 && !lampAuto()) out.push({ k: 'dark', sev: 1, stress: 0.25 });
+  const pL = phLevel();
+  if (pL) out.push({ k: S.ph < pl.ph[0] ? 'phLow' : 'phHigh', sev: pL, stress: pL === 2 ? 1.0 : 0.3 });
+  const eL = ecLevel();
+  if (eL === 2) out.push({ k: 'ecHigh', sev: 2, stress: 1.2 });
+  else if (eL === 1) out.push({ k: 'ecHigh', sev: 1, stress: 0.3 });
+  else if (eL === -2) out.push({ k: 'ecLow', sev: 2, stress: 0.6 });
+  else if (eL === -1) out.push({ k: 'ecLow', sev: 1, stress: 0.15 });
+  const T = tempNow(t), tL = tempLevel(T);
+  if (tL === 2) out.push({ k: 'hot', sev: 2, stress: 0.6 });
+  else if (tL === 1) out.push({ k: 'warm', sev: 1, stress: 0.05 });
+  else if (tL === -2) out.push({ k: 'cold', sev: 1, stress: 0.3 });
+  else if (tL === -1) out.push({ k: 'cool', sev: 1, stress: 0.05 });
+  if (p.growth >= 10 && S.lightYesterday < pl.light[0] - 3 && !lampAuto()) out.push({ k: 'dark', sev: 1, stress: 0.25 });
   const h = hourOf(t);
   if (!lampAuto() && S.lampOn && (h >= 23 || h < 5)) out.push({ k: 'nightLamp', sev: 1, stress: 0.1 });
   if (p.bolted) out.push({ k: 'bolted', sev: 1, stress: 0 });
@@ -439,14 +600,14 @@ function problems(t) {
 }
 
 function midnight(t) {
-  const p = S.plant;
-  if (!p.dead && S.lightToday > 18) {
+  const p = S.plant, pl = P();
+  if (!p.dead && !p.exhausted && S.lightToday > pl.longDay) {
     p.bolt += 15;
-    addLog(t, 'Лампа светила больше 18 часов: растению не хватило ночи.');
+    addLog(t, `Свет горел ${fmt(S.lightToday, 0)} ч — для ${pl.gen} это слишком долго, растение может зацвести.`);
   }
   S.lightYesterday = S.lightToday;
   S.lightToday = 0;
-  if (!p.dead) S.goodDays = p.health >= 80 ? S.goodDays + 1 : 0;
+  if (!p.dead && !p.exhausted) S.goodDays = p.health >= 80 ? S.goodDays + 1 : 0;
   if (Math.random() < 0.25) {
     S.heatUntil = t + (6 + Math.random() * 6) * HOUR;
     addLog(t, 'Отопление греет сильнее обычного: у батареи стало жарко.');
@@ -456,22 +617,24 @@ function midnight(t) {
 function step(t, dt) {
   const prev = t - dt * HOUR;
   if (dayKey(prev) !== dayKey(t)) midnight(t);
-  const p = S.plant;
+  const p = S.plant, pl = P();
   const L = lightNow(t), T = tempNow(t);
   if (L > 0.15) S.lightToday += dt;
-  const la = leafArea();
+  const idle = p.dead || p.exhausted;
+  const la = idle ? 0 : leafArea();
   // испарение и «питьё» растения
-  const drink = p.dead ? 0 : 0.010 * la * (L > 0.15 ? 1.4 : 0.5) * (T > 24 ? 1.3 : 1);
+  const drink = 0.010 * la * (L > 0.15 ? 1.4 : 0.5) * (T > 24 ? 1.3 : 1);
   S.water = Math.max(0, S.water - (0.0008 + drink) * dt);
-  if (!p.dead) S.nutrients = Math.max(0, S.nutrients - 0.0016 * la * (L > 0.15 ? 1 : 0.4) * dt);
+  // растение забирает соли вместе с водой, но чуть меньше, чем их в растворе, — поэтому EC медленно растёт
+  if (!idle) S.nutrients = Math.max(0, S.nutrients - drink * dt * ec() * 0.8);
   // автодолив с поплавковым клапаном
-  if (S.upgrades.autofill && fill() < minFill() + 0.06) {
+  if (S.upgrades.autofill && !idle && fill() < minFill() + 0.06) {
     const target = Math.min(minFill() + 0.2, maxFill() - 0.03) * TANK;
     if (target > S.water) addWater(target - S.water, true);
   }
   // pH медленно растёт, пока растение поглощает питание
-  if (!p.dead) S.ph = clamp(S.ph + 0.004 * (0.3 + la) * dt, 3.5, 9);
-  if (p.dead) return;
+  if (!idle) S.ph = clamp(S.ph + 0.004 * (0.3 + la) * dt, 3.5, 9);
+  if (idle) return;
 
   const pr = problems(t);
   const stress = pr.reduce((s, x) => s + x.stress, 0);
@@ -482,32 +645,32 @@ function step(t, dt) {
   const waterF = has('empty') ? 0 : has('low') ? 0.5 : 1;
   let rate;
   if (p.growth < 10) {
-    rate = (10 / 72) * tempFactor(T) * waterF;
+    rate = (10 / (pl.germ * 24)) * tempFactor(T) * waterF;
   } else {
     const ecF = sevOf('ecHigh') === 2 || sevOf('ecLow') === 2 ? 0.5 : (has('ecHigh') || has('ecLow') ? 0.85 : 1);
     const phF = sevOf('phHigh') === 2 || sevOf('phLow') === 2 ? 0.5 : (has('phHigh') || has('phLow') ? 0.85 : 1);
     const oxyF = has('overfill') ? 0.6 : 1;
-    rate = 0.2564 * Math.min(L, 1.2) * tempFactor(T) * ecF * phF * oxyF * waterF *
+    rate = growthK(S.plantType) * Math.min(L, 1.2) * tempFactor(T) * ecF * phF * oxyF * waterF *
       (0.4 + 0.6 * p.health / 100) * (S.upgrades.aerator ? 1.05 : 1);
   }
   const before = p.growth;
   p.growth = Math.min(100, p.growth + rate * dt);
-  if (p.growth >= 100 && before < 100) { p.fullSince = t; addLog(t, 'Руккола полностью выросла — пора собирать урожай!'); }
-  STAGES.forEach((s) => { if (s.at > 0 && before < s.at && p.growth >= s.at) addLog(t, `Новая стадия: ${s.name.toLowerCase()}.`); });
+  if (p.growth >= 100 && before < 100) { p.fullSince = t; addLog(t, 'Растение полностью выросло — пора собирать урожай!'); }
+  stagesOf(pl).forEach((s) => { if (s.at > 0 && before < s.at && p.growth >= s.at) addLog(t, `Новая стадия: ${s.name.toLowerCase()}.`); });
 
   // здоровье
   if (stress > 0.12) p.health = clamp(p.health - stress * dt, 0, 100);
   else p.health = clamp(p.health + 1.2 * dt, 0, 100);
   if (p.health <= 0) {
     p.dead = true;
-    addLog(t, 'Растение погибло. Посей семена заново и следи за подсказками.');
+    addLog(t, 'Растение погибло. Посади новое и следи за подсказками.');
   }
-  // стрелкование
-  if (T > 25) p.bolt += 1.2 * dt;
+  // цветение (стрелкование)
+  if (T > pl.hot) p.bolt += 1.2 * dt;
   if (p.fullSince && t - p.fullSince > 6 * DAY) p.bolt += 1.5 * dt;
   if (!p.bolted && p.bolt >= 100) {
     p.bolted = true;
-    addLog(t, 'Руккола пошла в стрелку: появился цветонос, листья стали горькими.');
+    addLog(t, `${pl.boltTitle}: появился цветонос, листья стали грубее.`);
   }
 }
 
@@ -549,7 +712,7 @@ function addWater(liters, auto) {
 }
 const ACTIONS = {
   water() {
-    if (S.plant.dead) return toast('Сначала посей семена заново.');
+    if (S.plant.dead || S.plant.exhausted) return toast('Сначала посади новое растение.');
     const a = addWater(0.3);
     if (!a) return toast('Бак полон до краёв.');
     addLog(S.gameTime, 'Долили 0,3 л воды.');
@@ -557,7 +720,7 @@ const ACTIONS = {
     else toast('Долили 0,3 л отстоянной воды. Раствор стал слабее.');
   },
   feed() {
-    if (S.plant.dead) return toast('Сначала посей семена заново.');
+    if (S.plant.dead || S.plant.exhausted) return toast('Сначала посади новое растение.');
     S.nutrients += 0.4; S.ph = clamp(S.ph - 0.05, 3.5, 9);
     addLog(S.gameTime, 'Добавили удобрение для гидропоники.');
     toast(`Добавили удобрение. Концентрация раствора выросла${S.upgrades.ecmeter ? ' до ' + fmt(ec(), 2) + ' мСм/см' : ''}.`);
@@ -571,83 +734,96 @@ const ACTIONS = {
     toast('Добавили немного pH+ — раствор стал щелочнее.');
   },
   lamp() {
-    if (lampAuto()) return toast(S.upgrades.timer ? 'Лампой управляет таймер: с 7:00 до 21:00.' : 'В ускоренном режиме лампа работает по таймеру.');
+    if (lampAuto()) return toast(S.upgrades.timer ? `Лампой управляет таймер: с 7:00 до ${7 + lampHours()}:00.` : 'В ускоренном режиме лампа работает по таймеру.');
     S.lampOn = !S.lampOn;
     addLog(S.gameTime, S.lampOn ? 'Включили фитолампу.' : 'Выключили фитолампу.');
-    toast(S.lampOn ? 'Фитолампа включена. Рукколе нужно 12–14 часов света в сутки.' : 'Фитолампа выключена. Ночью растениям нужна темнота.');
+    toast(S.lampOn ? `Фитолампа включена. ${P().name}: нужно ${range(P().light, 0)} часов света в сутки.` : 'Фитолампа выключена. Ночью растениям нужна темнота.');
   },
   vent() {
     S.ventUntil = S.gameTime + HOUR;
     addLog(S.gameTime, 'Проветрили комнату.');
-    toast('Проветрили комнату: на час стало прохладнее на 4 °С. Сквозняков руккола не боится, но мороз ей не друг.');
+    toast('Проветрили комнату: на час стало прохладнее на 4 °С.');
   },
   cut() {
-    const p = S.plant;
-    if (p.dead || p.growth < 75) return toast('Срезать листья можно, когда растение подрастёт.');
-    const grams = Math.round(120 * (p.growth / 100) * (0.5 + p.health / 200) * (p.bolted ? 0.4 : 1));
+    const p = S.plant, pl = P();
+    if (p.dead || p.exhausted || p.growth < 75) return toast('Собирать урожай можно, когда растение подрастёт.');
+    const grams = Math.round(pl.yield * (p.growth / 100) * (0.5 + p.health / 200) * (p.bolted ? 0.4 : 1));
     const reward = Math.max(5, Math.round(grams / 4));
     S.coins += reward; S.stats.grams += grams; S.stats.harvests += 1;
+    S.stats.kinds[S.plantType] = (S.stats.kinds[S.plantType] || 0) + grams;
     p.cuts += 1;
-    addLog(S.gameTime, `Собрали ${grams} г рукколы.`);
-    if (p.cuts >= 3 || p.bolted) {
-      p.growth = 100; p.dead = false;
+    addLog(S.gameTime, `Собрали урожай: ${pl.name.toLowerCase()}, ${grams} г.`);
+    const left = pl.cuts - p.cuts;
+    if (left <= 0 || p.bolted) {
       p.exhausted = true;
-      openModal(`<h2>Урожай: ${grams} г</h2><p>${p.bolted ? 'Руккола уже цвела, поэтому урожай меньше и листья горчат.' : 'Это был третий срез — растение устало.'} Пора посеять новые семена и заменить раствор.</p><p class="price">+${reward} ${I.leaf}</p><button class="btn" data-close>Понятно</button>`);
+      const why = p.bolted ? 'Растение уже цвело, поэтому урожай меньше, а листья грубее.'
+        : pl.cuts === 1 ? 'Его срезают один раз.' : 'Это был последний срез — растение отдало всё, что могло.';
+      openModal(`<h2>Урожай: ${grams} г</h2><p style="margin:0">${why} Пора посадить что-нибудь новое.</p><p class="price">+${reward} ${I.leaf}</p><button class="btn" data-pickopen>Выбрать, что посадить</button>`);
     } else {
       p.growth = 50; p.fullSince = null;
-      openModal(`<h2>Урожай: ${grams} г</h2><p>Ты срезал внешние листья, а сердцевину оставил — руккола отрастёт снова. Осталось срезов: ${3 - p.cuts}.</p><p class="price">+${reward} ${I.leaf}</p><button class="btn" data-close>Отлично!</button>`);
+      openModal(`<h2>Урожай: ${grams} г</h2><p style="margin:0">${pl.cutText} Осталось срезов: ${left}.</p><p class="price">+${reward} ${I.leaf}</p><button class="btn" data-close>Отлично!</button>`);
     }
-    save(); render();
   },
-  sow() {
-    const t = S.gameTime;
-    S.plant = freshPlant(t);
-    S.water = 2.7; S.nutrients = 2.7 * 0.6; S.ph = 6.3;
-    S.stats.cycles += 1;
-    addLog(t, 'Посеяли новые семена, налили свежий раствор (EC 0,6, pH 6,3).');
-    toast('Посеяли рукколу! Первые 3 дня семена прорастают — свет пока не обязателен.');
-  },
+  sow() { openPlantPicker(false); },
+  pick() { openPlantPicker(true); },
   solution() {
+    if (S.plant.dead || S.plant.exhausted) return toast('Свежий раствор нальётся, когда посадишь новое растение.');
     if (S.coins < 5) return toast('Нужно 5 листиков на новое удобрение. Выполни задание!');
     S.coins -= 5;
     S.water = ((minFill() + maxFill()) / 2) * TANK;
-    const [lo, hi] = ecRange();
-    S.nutrients = S.water * ((lo + hi) / 2); S.ph = 6.2;
+    const [lo, hi] = ecRange(), [pa, pb] = P().ph;
+    S.nutrients = S.water * ((lo + hi) / 2); S.ph = (pa + pb) / 2;
     addLog(S.gameTime, 'Заменили питательный раствор.');
-    toast('Свежий раствор: pH 6,2, концентрация в норме. Так делают раз в 2–3 недели.');
+    toast(`Свежий раствор: pH ${fmt(S.ph, 1)}, концентрация в норме. Так делают раз в 2–3 недели.`);
   },
 };
+function plantSeed(id) {
+  const t = S.gameTime, pl = PLANTS[id];
+  S.plantType = id; S.picked = true;
+  S.plant = freshPlant(t);
+  S.water = 2.7;
+  S.nutrients = 2.7 * ((pl.ecSeed[0] + pl.ecSeed[1]) / 2);
+  S.ph = (pl.ph[0] + pl.ph[1]) / 2;
+  S.stats.cycles += 1;
+  addLog(t, `Посадили: ${pl.name.toLowerCase()}. Налили свежий раствор (pH ${fmt(S.ph, 1)}, EC ${fmt(ec(), 1)}).`);
+  toast(`Посадили: ${pl.name.toLowerCase()}! Всходы появятся примерно через ${pl.germ} ${dayWord(pl.germ)}.`);
+}
 
 // ===================== ТЕКСТЫ ПОДСКАЗОК =====================
-const ADVICE = {
-  dead: ['Растение погибло', 'Не расстраивайся: у настоящих агрономов тоже бывают неудачи. Посей семена заново и следи за подсказками.'],
-  empty: ['Раствор закончился! Корни сохнут', 'Долей воду и добавь удобрение. В методе Кратки уровень снижается сам, но совсем без раствора растение погибнет.'],
-  low: ['Корни не достают до раствора', 'Долей немного воды: раствор должен касаться кончиков корней. Зелёная полоска на шкале «Раствор» — правильный уровень.'],
-  overfill: ['Корням не хватает воздуха!', 'В методе Кратки между крышкой и раствором нужен воздушный зазор: верхние корни дышат, нижние пьют. Не доливай до краёв — подожди, пока растение выпьет лишнее, или поставь аэратор.'],
-  phHigh: ['Раствор слишком щелочной', 'Добавь pH− (в жизни — средство pH Down или щепотку лимонной кислоты). Норма для рукколы — pH 6,0–6,8.'],
-  phLow: ['Раствор слишком кислый', 'Добавь pH+. При неправильном pH корни плохо усваивают питание, даже если удобрения хватает.'],
-  ecHigh: ['Раствор слишком крепкий', 'Долей чистой воды — концентрация снизится. Норма EC 0,8–1,6 мСм/см, для всходов слабее. Удобрения не должно быть больше, чем написано в инструкции.'],
-  ecLow: ['Растению не хватает питания', 'Добавь удобрение для гидропоники. Без питания листья светлеют и желтеют.'],
-  hot: ['Жарко! Руккола может зацвести', 'Выше +25 °С руккола стрелкуется, листья горчат. Проветри комнату, поставь эко-бокс подальше от батареи.'],
-  warm: ['Тепловато для рукколы', 'Лучшая температура +16…+20 °С. Поставь эко-бокс подальше от батареи или купи вентилятор.'],
-  cold: ['Холодно', 'Ниже +12 °С руккола растёт медленно. Закрой окно после проветривания.'],
-  dark: ['Мало света', 'Включай фитолампу на 12–14 часов в сутки. В ноябре в Казани светло меньше 9 часов, а через стекло света ещё меньше.'],
-  nightLamp: ['Ночью лампу лучше выключить', 'Растениям нужна темнота хотя бы 8 часов. Если светить круглые сутки, руккола начнёт цвести. Таймер решит эту задачу.'],
-  bolted: ['Руккола пошла в стрелку', 'Появился цветонос, листья стали горче. Срежь урожай и посей заново. Чтобы этого не было, держи прохладу и не свети больше 14 часов.'],
-  ready: ['Урожай готов!', 'Срежь внешние листья ножницами, а сердцевину оставь — руккола отрастёт ещё. Если долго не срезать, она зацветёт.'],
-  canCut: ['Можно срезать первые листья', 'Молодые листья самые нежные. Можно подождать полного урожая или срезать сейчас.'],
-  germ: ['Семена прорастают', 'Первые 3 дня свет не обязателен: главное — влага и тепло +18…+20 °С. Раствор для всходов делают слабым.'],
-};
+function advice(k) {
+  const pl = P(), n = pl.name.toLowerCase();
+  const A = {
+    dead: ['Растение погибло', 'Не расстраивайся: у настоящих агрономов тоже бывают неудачи. Посади новое растение и следи за подсказками.'],
+    empty: ['Раствор закончился! Корни сохнут', 'Долей воду и добавь удобрение. В методе Кратки уровень снижается сам, но совсем без раствора растение погибнет.'],
+    low: ['Корни не достают до раствора', 'Долей немного воды: раствор должен касаться кончиков корней. Зелёная полоска на шкале «Раствор» — правильный уровень.'],
+    overfill: ['Корням не хватает воздуха!', 'В методе Кратки между крышкой и раствором нужен воздушный зазор: верхние корни дышат, нижние пьют. Не доливай до краёв — подожди, пока растение выпьет лишнее, или поставь аэратор.'],
+    phHigh: ['Раствор слишком щелочной', `Добавь pH− (в жизни — средство pH Down или щепотку лимонной кислоты). Норма для ${pl.gen} — pH ${range(pl.ph)}.`],
+    phLow: ['Раствор слишком кислый', `Добавь pH+. Норма для ${pl.gen} — pH ${range(pl.ph)}. При неправильном pH корни плохо усваивают питание.`],
+    ecHigh: ['Раствор слишком крепкий', `Долей чистой воды — концентрация снизится. Норма для ${pl.gen} сейчас: EC ${range(ecRange())} мСм/см. Удобрения не должно быть больше, чем написано в инструкции.`],
+    ecLow: ['Растению не хватает питания', `Добавь удобрение для гидропоники. Норма для ${pl.gen} сейчас: EC ${range(ecRange())} мСм/см. Без питания листья светлеют и желтеют.`],
+    hot: ['Слишком жарко!', `Выше +${pl.hot} °С ${n} страдает от жары${pl.look === 'basil' ? '' : ', быстро зацветает, а листья грубеют'}. Проветри комнату или переставь эко-бокс подальше от батареи.`],
+    warm: [`Тепловато для ${pl.gen}`, `Лучшая температура ${tRange(pl.temp)}. Переставь эко-бокс подальше от батареи или поставь вентилятор.`],
+    cool: [`Прохладно для ${pl.gen}`, `Лучшая температура ${tRange(pl.temp)}.${pl.look === 'basil' ? ' Базилик родом из жарких стран: верни эко-бокс с полки на подоконник поближе к батарее (во вкладке «Улучшения»).' : ' Закрой окно после проветривания.'}`],
+    cold: ['Холодно', `Ниже +${pl.cold} °С ${n} почти не растёт. Закрой окно и поставь эко-бокс в тёплое место.`],
+    dark: ['Мало света', `Включай фитолампу на ${range(pl.light, 0)} часов в сутки. В ноябре в Казани светло меньше 9 часов, а через стекло света ещё меньше.`],
+    nightLamp: ['Ночью лампу лучше выключить', 'Растениям нужна темнота хотя бы 8 часов, иначе они начинают цвести. Таймер решит эту задачу.'],
+    bolted: [pl.boltTitle, 'Появился цветонос, листья стали грубее. Собери урожай и посади что-нибудь новое. Чтобы этого не было, следи за температурой и не свети дольше нормы.'],
+    ready: ['Урожай готов!', pl.cutText + ' Если долго не собирать, растение зацветёт.'],
+    canCut: ['Можно собирать первый урожай', 'Молодые листья самые нежные. Можно подождать полного урожая или срезать сейчас.'],
+    germ: ['Семена прорастают', `Всходы появятся примерно через ${pl.germ} ${dayWord(pl.germ)}. Свет пока не обязателен: главное — влага и тепло. Раствор для всходов делают слабым.`],
+  };
+  return A[k];
+}
 const TIPS = [
   { h: 'Свет', items: [
-    'Рукколе нужно 12–14 часов света в сутки. Зимой без фитолампы она вытягивается и бледнеет.',
+    'Листовой зелени нужно 10–16 часов света в сутки, у каждого растения своя норма. Зимой без фитолампы растения вытягиваются и бледнеют.',
     'Светодиодную фитолампу вешают на 15–30 см над растениями и поднимают по мере роста.',
-    'Ночью растениям нужна темнота не меньше 8 часов. Круглосуточный свет заставляет рукколу цвести.',
+    'Ночью растениям нужна темнота не меньше 8 часов. Круглосуточный свет заставляет их цвести.',
     'Отражающий экран из фольги возвращает растениям часть света, которая ушла бы в стену.',
   ] },
   { h: 'Раствор', items: [
-    'Кислотность (pH) раствора для рукколы — 6,0–6,8. Проверяй её тест-полосками или pH-метром раз в неделю.',
-    'Концентрацию раствора измеряют EC-метром: 0,8–1,6 мСм/см для взрослой рукколы, для всходов — слабее.',
+    'Кислотность (pH) раствора для большинства зелени — от 5,5 до 7,0. Проверяй её тест-полосками или pH-метром раз в неделю.',
+    'Концентрацию раствора измеряют EC-метром. Для всходов раствор делают слабее, чем для взрослых растений.',
     'Удобрение разводят строго по инструкции: лишнее «обжигает» корни.',
     'Воду для раствора лучше отстоять сутки, чтобы ушёл хлор и она стала комнатной температуры.',
     'Раствор целиком меняют раз в 2–3 недели, а между заменами доливают воду.',
@@ -660,15 +836,15 @@ const TIPS = [
     'Тёплый раствор (выше +24 °С) хуже держит кислород. Лучше всего +18…+22 °С.',
   ] },
   { h: 'Температура и воздух', items: [
-    'Руккола любит прохладу: +16…+20 °С. В жару она быстро цветёт и горчит.',
-    'Не ставь эко-бокс над батареей отопления: там жарко и сухо.',
+    'Руккола, салат, шпинат и кресс-салат любят прохладу +15…+20 °С, а базилик — тепло +22…+28 °С.',
+    'Над батареей отопления жарко и сухо. Прохладолюбивую зелень ставь подальше от неё.',
     'Лёгкий ветерок от вентилятора делает стебли крепче и защищает от плесени.',
   ] },
   { h: 'Урожай', items: [
-    'Первые листья можно срезать через 20–30 дней после посева.',
-    'Срезай внешние листья ножницами, оставляя сердцевину: руккола отрастёт и даст урожай ещё 1–2 раза.',
-    'Самые нежные — молодые листья длиной 8–12 см.',
-    'Храни рукколу в холодильнике в закрытом контейнере с бумажным полотенцем.',
+    'Кресс-салат собирают через 2 недели, рукколу — через 3–4, а базилик — через 6–7 недель.',
+    'Срезай внешние листья ножницами, оставляя сердцевину: руккола, салат и шпинат отрастут снова.',
+    'Молодые листья самые нежные.',
+    'Храни зелень в холодильнике в закрытом контейнере с бумажным полотенцем.',
   ] },
   { h: 'Безопасность', items: [
     'С удобрениями работай в перчатках, вместе со взрослыми. Раствор нельзя пробовать на вкус.',
@@ -722,6 +898,10 @@ const QUIZ = [
   { q: 'Можно ли срезать рукколу несколько раз?', o: ['Нет, после срезки она погибает', 'Да, если оставить сердцевину, листья отрастут', 'Только зимой', 'Только ночью'], a: 1, e: 'Обычно её срезают 2–3 раза.' },
   { q: 'Чем плох слишком крепкий раствор?', o: ['Он «обжигает» корни', 'Он слишком сладкий', 'Он светится', 'Ничем'], a: 0, e: 'Удобрение разводят строго по инструкции.' },
   { q: 'Какую воду лучше брать для раствора?', o: ['Горячую из чайника', 'Отстоянную, комнатной температуры', 'Морскую', 'Газированную'], a: 1, e: 'За сутки из воды уходит хлор, и она нагревается до комнатной температуры.' },
+  { q: 'Какое растение из нашей игры любит тепло больше всех?', o: ['Шпинат', 'Базилик', 'Салат', 'Кресс-салат'], a: 1, e: 'Базилику лучше всего при +22…+28 °С.' },
+  { q: 'Почему шпинат нельзя освещать больше 14 часов в сутки?', o: ['Он сгорит', 'Он быстро зацветёт', 'Он посинеет', 'Можно, ничего не будет'], a: 1, e: 'Шпинат — растение короткого дня: длинный день заставляет его цвести.' },
+  { q: 'Какое растение даст урожай быстрее всех?', o: ['Кресс-салат', 'Базилик', 'Шпинат', 'Салат'], a: 0, e: 'Кресс-салат срезают уже через 10–14 дней.' },
+  { q: 'На каком растении Бернард Кратки испытывал свой метод?', o: ['На кактусе', 'На салате-латуке', 'На дубе', 'На подсолнухе'], a: 1, e: 'Его статья 2009 года так и называется: «Три метода выращивания салата без циркуляции раствора».' },
 ];
 const RIDDLES = [
   { id: 'g1', q: 'Солнца нет, а свет горит,\nЗелень бодро в рост бежит.\nНад растеньями висит —\nКто им солнце заменит?', a: ['ФИТОЛАМПА', 'ЛАМПА'], hint: 'Это светодиодная …лампа.' },
@@ -733,12 +913,14 @@ const RIDDLES = [
 const ACHIEVEMENTS = [
   { id: 'a1', name: 'Первые всходы', d: 'Дорасти до семядолей', r: 10, ok: () => S.plant.growth >= 10 || S.stats.harvests > 0 },
   { id: 'a2', name: 'Настоящий лист', d: 'Дорасти до первого настоящего листа', r: 10, ok: () => S.plant.growth >= 20 || S.stats.harvests > 0 },
-  { id: 'a3', name: 'Первый урожай', d: 'Срезать рукколу', r: 20, ok: () => S.stats.harvests >= 1 },
+  { id: 'a3', name: 'Первый урожай', d: 'Собрать первый урожай', r: 20, ok: () => S.stats.harvests >= 1 },
   { id: 'a4', name: 'Полкило зелени', d: 'Собрать 500 г рукколы за всё время', r: 40, ok: () => S.stats.grams >= 500 },
   { id: 'a5', name: 'Неделя заботы', d: '7 игровых дней подряд здоровье не ниже 80 %', r: 25, ok: () => S.goodDays >= 7 },
   { id: 'a6', name: 'Мастер ребусов', d: 'Отгадать все ребусы', r: 30, ok: () => REBUSES.every((r) => S.solved[r.id]) },
   { id: 'a7', name: 'Эрудит', d: 'Правильно ответить на все вопросы викторины', r: 30, ok: () => QUIZ.every((q, i) => S.solved['q' + i]) },
   { id: 'a8', name: 'Полный огород', d: 'Купить все улучшения', r: 50, ok: () => SHOP.every((u) => S.upgrades[u.id]) },
+  { id: 'a9', name: 'Ботаник', d: 'Собрать урожай трёх разных растений', r: 30, ok: () => Object.keys(S.stats.kinds).length >= 3 },
+  { id: 'a10', name: 'Весь огород', d: 'Собрать урожай всех пяти растений', r: 50, ok: () => Object.keys(S.stats.kinds).length >= 5 },
 ];
 function checkAchievements() {
   ACHIEVEMENTS.forEach((a) => {
@@ -758,7 +940,7 @@ const SHOP = [
     ico: '<svg viewBox="0 0 32 32"><rect x="11" y="3" width="10" height="20" rx="3" fill="#2c82b0"/><rect x="14" y="23" width="4" height="7" rx="1" fill="#56685b"/><text x="16" y="15" font-size="7" font-weight="800" text-anchor="middle" fill="#fff" font-family="sans-serif">pH</text></svg>' },
   { id: 'ecmeter', name: 'EC-метр', price: 25, d: 'Измеряет концентрацию удобрений в растворе (мСм/см). Без него видно только «мало», «норма» или «много».',
     ico: '<svg viewBox="0 0 32 32"><rect x="11" y="3" width="10" height="20" rx="3" fill="#3e8e3a"/><rect x="14" y="23" width="4" height="7" rx="1" fill="#56685b"/><text x="16" y="15" font-size="7" font-weight="800" text-anchor="middle" fill="#fff" font-family="sans-serif">EC</text></svg>' },
-  { id: 'shelf', name: 'Полка подальше от батареи', price: 15, d: 'Эко-бокс переезжает с горячего подоконника над батареей: в комнате становится на 2 °С прохладнее для рукколы.',
+  { id: 'shelf', name: 'Полка подальше от батареи', price: 15, d: 'На полке у окна на 2 °С прохладнее, чем над батареей: рукколе, салату и шпинату там лучше. Теплолюбивый базилик можно вернуть на подоконник — переставлять можно сколько угодно.',
     ico: '<svg viewBox="0 0 32 32"><rect x="4" y="14" width="24" height="4" rx="1" fill="#8d6e4a"/><path d="M8 18v8M24 18v8" stroke="#8d6e4a" stroke-width="2.5"/><rect x="10" y="6" width="12" height="8" rx="2" fill="#3e8e3a"/></svg>' },
   { id: 'reflector', name: 'Отражающий экран', price: 20, d: 'Фольга вокруг эко-бокса возвращает растениям свет, который ушёл бы в стену: +10 % света.',
     ico: '<svg viewBox="0 0 32 32"><path d="M6 6l6 2v18l-6-2z" fill="#b8c2c9"/><path d="M26 6l-6 2v18l6-2z" fill="#d9e1e6"/><path d="M16 4v8" stroke="#e9a91f" stroke-width="2.5" stroke-linecap="round"/></svg>' },
@@ -776,6 +958,7 @@ function buy(id) {
   if (!u || S.upgrades[id]) return;
   if (S.coins < u.price) return toast(`Не хватает ${u.price - S.coins} листиков. Загляни в «Задания»!`);
   S.coins -= u.price; S.upgrades[id] = true;
+  if (id === 'shelf') S.onShelf = true;
   addLog(S.gameTime, `Куплено улучшение: ${u.name.toLowerCase()}.`);
   toast(`Готово: ${u.name.toLowerCase()} теперь в твоём огороде!`);
   checkAchievements(); save(); render();
@@ -788,7 +971,8 @@ const VW = 400, VH = 290;
 let anim = 0;
 const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function mix(a, b, k) {
-  const pa = a.match(/\w\w/g).map((x) => parseInt(x, 16)), pb = b.match(/\w\w/g).map((x) => parseInt(x, 16));
+  const pa = a.replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16));
+  const pb = b.replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16));
   return '#' + pa.map((v, i) => Math.round(v + (pb[i] - v) * k).toString(16).padStart(2, '0')).join('');
 }
 function skyColors(h) {
@@ -797,80 +981,196 @@ function skyColors(h) {
   if (h < 16) return ['#8fc4e6', '#dceff8'];
   const k = (h - 16) / 3; return [mix('8fc4e6', '142039', k), mix('f4c79b', '2a3a63', k)];
 }
-function leafPath(len, wid) {
-  const l = len, w = wid;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.bezierCurveTo(l * 0.15, -w * 0.15, l * 0.25, -w * 0.25, l * 0.3, -w * 0.15);
-  ctx.bezierCurveTo(l * 0.33, -w * 0.6, l * 0.42, -w * 0.7, l * 0.46, -w * 0.25);
-  ctx.bezierCurveTo(l * 0.52, -w * 0.85, l * 0.64, -w, l * 0.67, -w * 0.35);
-  ctx.bezierCurveTo(l * 0.75, -w * 1.05, l * 0.97, -w * 0.9, l, 0);
-  ctx.bezierCurveTo(l * 0.97, w * 0.9, l * 0.75, w * 1.05, l * 0.67, w * 0.35);
-  ctx.bezierCurveTo(l * 0.64, w, l * 0.52, w * 0.85, l * 0.46, w * 0.25);
-  ctx.bezierCurveTo(l * 0.42, w * 0.7, l * 0.33, w * 0.6, l * 0.3, w * 0.15);
-  ctx.bezierCurveTo(l * 0.25, w * 0.25, l * 0.15, w * 0.15, 0, 0);
-  ctx.closePath();
+// Формы листьев: рисуются вдоль оси X, черешок в точке (0, 0)
+function lobedLeaf(c, l, w) { // рассечённый лист рукколы
+  c.beginPath();
+  c.moveTo(0, 0);
+  c.bezierCurveTo(l * 0.15, -w * 0.15, l * 0.25, -w * 0.25, l * 0.3, -w * 0.15);
+  c.bezierCurveTo(l * 0.33, -w * 0.6, l * 0.42, -w * 0.7, l * 0.46, -w * 0.25);
+  c.bezierCurveTo(l * 0.52, -w * 0.85, l * 0.64, -w, l * 0.67, -w * 0.35);
+  c.bezierCurveTo(l * 0.75, -w * 1.05, l * 0.97, -w * 0.9, l, 0);
+  c.bezierCurveTo(l * 0.97, w * 0.9, l * 0.75, w * 1.05, l * 0.67, w * 0.35);
+  c.bezierCurveTo(l * 0.64, w, l * 0.52, w * 0.85, l * 0.46, w * 0.25);
+  c.bezierCurveTo(l * 0.42, w * 0.7, l * 0.33, w * 0.6, l * 0.3, w * 0.15);
+  c.bezierCurveTo(l * 0.25, w * 0.25, l * 0.15, w * 0.15, 0, 0);
+  c.closePath();
 }
-function drawPlant(x, y, seed) {
-  const p = S.plant, g = p.growth;
-  const health = p.dead ? 0 : p.health / 100;
-  const base = p.dead ? '#8a6d3b' : mix('c8b14a', '4f9a3c', clamp(health * 1.2, 0, 1));
-  const pale = S.lightYesterday < 9 && !lampAuto() && g > 10 ? 0.3 : 0;
-  const col = pale ? mix(base.slice(1), 'b9d98a', pale) : base;
-  const droop = p.dead ? 1 : clamp((60 - p.health) / 60, 0, 0.7) + (problems(S.gameTime).some((q) => q.k === 'empty' || q.k === 'low') ? 0.3 : 0);
+function broadLeaf(c, l, w) { // широкий волнистый лист салата
+  const cx = l * 0.6, a = l * 0.42;
+  c.beginPath(); c.moveTo(0, 0); c.lineTo(cx - a, 0);
+  for (let i = 0; i <= 48; i++) {
+    const th = Math.PI + (i / 48) * Math.PI * 2;
+    const r = 1 + 0.07 * Math.sin(th * 9);
+    c.lineTo(cx + Math.cos(th) * a * r, Math.sin(th) * w * r);
+  }
+  c.closePath();
+}
+function ovalLeaf(c, l, w) { // гладкий овальный лист базилика
+  c.beginPath(); c.moveTo(0, 0);
+  c.bezierCurveTo(l * 0.25, -w, l * 0.75, -w * 0.9, l, 0);
+  c.bezierCurveTo(l * 0.75, w * 0.9, l * 0.25, w, 0, 0);
+  c.closePath();
+}
+function spadeLeaf(c, l, w) { // черешок и копьевидная пластинка шпината
+  const s = l * 0.32;
+  c.beginPath(); c.moveTo(0, -1); c.lineTo(s, -1);
+  c.bezierCurveTo(s - l * 0.05, -w * 1.1, l * 0.8, -w * 0.9, l, 0);
+  c.bezierCurveTo(l * 0.8, w * 0.9, s - l * 0.05, w * 1.1, s, 1);
+  c.lineTo(0, 1); c.closePath();
+}
+function drawLeaf(c, x, y, ang, len, wid, shape, fill, vein) {
+  c.save(); c.translate(x, y); c.rotate(ang);
+  c.fillStyle = fill; shape(c, len, wid); c.fill();
+  c.strokeStyle = vein || 'rgba(30,70,30,.45)'; c.lineWidth = 0.7;
+  c.beginPath(); c.moveTo(0, 0); c.lineTo(len * 0.95, 0); c.stroke();
+  c.restore();
+}
+// v: { type, growth, health, dead, bolted, exhausted, pale, thirsty }
+function drawPlant(c, x, y, seed, v) {
+  const pl = PLANTS[v.type] || PLANTS.arugula, g = v.growth;
+  const health = v.dead ? 0 : v.health / 100;
+  let col = v.dead ? '#8a6d3b' : mix('c8b14a', pl.color, clamp(health * 1.2, 0, 1));
+  if (v.pale) col = mix(col, 'b9d98a', 0.3);
+  const dark = mix(col, '1f4a1f', 0.35);
+  const droop = v.dead ? 1 : clamp((60 - health * 100) / 60, 0, 0.7) + (v.thirsty ? 0.3 : 0);
+  if (v.exhausted) {
+    c.strokeStyle = dark; c.lineWidth = 1.6;
+    for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(x - 6 + i * 3, y); c.lineTo(x - 7 + i * 3.4, y - 4 - (i % 2) * 2); c.stroke(); }
+    return;
+  }
   if (g < 4) {
-    // семена на субстрате
-    ctx.fillStyle = '#6b4a2b';
-    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(x - 6 + i * 6, y - 1, 1.6, 1.1, 0, 0, Math.PI * 2); ctx.fill(); }
+    c.fillStyle = '#6b4a2b';
+    const n = pl.look === 'cress' ? 6 : 3;
+    for (let i = 0; i < n; i++) { c.beginPath(); c.ellipse(x - 8 + i * (16 / (n - 1)), y - 1, 1.6, 1.1, 0, 0, Math.PI * 2); c.fill(); }
     return;
   }
   if (g < 10) {
-    ctx.strokeStyle = '#d9cfb0'; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 2, y - 4, x + 1, y - 2 - (g - 4)); ctx.stroke();
-    ctx.fillStyle = '#d9cfb0'; ctx.beginPath(); ctx.ellipse(x + 1, y - 3 - (g - 4), 1.8, 1.4, 0, 0, Math.PI * 2); ctx.fill();
+    c.strokeStyle = '#d9cfb0'; c.lineWidth = 1.4;
+    c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + 2, y - 4, x + 1, y - 2 - (g - 4)); c.stroke();
+    c.fillStyle = '#d9cfb0'; c.beginPath(); c.ellipse(x + 1, y - 3 - (g - 4), 1.8, 1.4, 0, 0, Math.PI * 2); c.fill();
     return;
   }
-  // семядоли
-  const cot = clamp((g - 10) / 10, 0, 1);
-  const stem = 4 + cot * 4;
-  ctx.strokeStyle = mix(col.slice(1), '24572a', 0.3); ctx.lineWidth = 1.6;
-  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - stem); ctx.stroke();
-  [-1, 1].forEach((s) => {
-    ctx.save(); ctx.translate(x + s * (4 + cot * 3), y - stem - 1 + droop * 3);
-    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, 4 + cot * 3, 2.6 + cot * 1.6, s * 0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  });
-  if (g < 20) return;
-  // настоящие листья
-  const size = clamp((g - 20) / 80, 0, 1);
-  const n = Math.round(2 + size * 9);
-  const maxLen = 18 + size * 68;
-  for (let i = 0; i < n; i++) {
-    const k = i / Math.max(1, n - 1);
-    const side = i % 2 ? 1 : -1;
-    const spread = side * (0.15 + 1.0 * (1 - k)) * (0.6 + ((seed * 7 + i * 13) % 10) / 25);
-    const ang = -Math.PI / 2 + spread + side * droop * 0.9;
-    const len = maxLen * (0.55 + 0.45 * ((i * 37 + seed * 11) % 10) / 10) * (i < 2 ? 0.75 : 1);
-    ctx.save();
-    ctx.translate(x, y - stem + 2);
-    ctx.rotate(ang);
-    ctx.fillStyle = i % 3 === 0 ? mix(col.slice(1), '2f7d32', 0.25) : col;
-    leafPath(len, 3 + len * 0.13);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(30,70,30,.45)'; ctx.lineWidth = 0.7;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len * 0.95, 0); ctx.stroke();
-    ctx.restore();
-  }
-  if (p.bolted) {
-    // цветонос с цветками (бледно-жёлтые лепестки с фиолетовыми жилками)
-    ctx.strokeStyle = '#4f7f3a'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(x, y - stem); ctx.quadraticCurveTo(x + 6, y - 60, x + 2, y - 100); ctx.stroke();
-    for (let j = 0; j < 4; j++) {
-      const fy = y - 70 - j * 9, fx = x + 4 - j;
-      ctx.fillStyle = '#f2e8b8'; ctx.beginPath(); ctx.arc(fx, fy, 3.2, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#6a3f9c'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(fx - 2, fy); ctx.lineTo(fx + 2, fy); ctx.stroke();
+  const cot = clamp((g - 10) / 10, 0, 1), size = clamp((g - 20) / 80, 0, 1), sc = pl.maxH / 18;
+  if (pl.look === 'cress') {
+    // кресс-салат — густая «щёточка» ростков
+    const n = 6 + Math.round(cot * 4 + size * 8);
+    for (let i = 0; i < n; i++) {
+      const dx = ((i * 37 + seed * 13) % 23) - 11;
+      const h = (4 + cot * 8 + size * 30) * sc * (0.75 + ((i * 17) % 10) / 40);
+      const tx = x + dx * (1 + droop * 0.6), ty = y - h * (1 - droop * 0.35);
+      c.strokeStyle = '#d3e6ae'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x + dx * 0.6, y); c.quadraticCurveTo(x + dx, y - h * 0.5, tx, ty); c.stroke();
+      c.fillStyle = i % 3 ? col : dark;
+      [-1, 0, 1].forEach((s) => { c.beginPath(); c.ellipse(tx + s * 3, ty - (s === 0 ? 2 : 0), 2.4 + size * 1.2, 1.5 + size * 0.7, s * 0.6, 0, Math.PI * 2); c.fill(); });
+    }
+  } else {
+    // семядоли
+    const stem = 4 + cot * 4;
+    c.strokeStyle = dark; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x, y - stem); c.stroke();
+    [-1, 1].forEach((s) => {
+      c.save(); c.translate(x + s * (4 + cot * 3), y - stem - 1 + droop * 3);
+      c.fillStyle = col; c.beginPath(); c.ellipse(0, 0, 4 + cot * 3, 2.6 + cot * 1.6, s * 0.3, 0, Math.PI * 2); c.fill();
+      c.restore();
+    });
+    if (g >= 20) {
+      const by = y - stem + 2;
+      if (pl.look === 'arugula') {
+        const n = Math.round(2 + size * 9), maxLen = (18 + 68 * size) * sc;
+        for (let i = 0; i < n; i++) {
+          const k = i / Math.max(1, n - 1), side = i % 2 ? 1 : -1;
+          const spread = side * (0.15 + 1.0 * (1 - k)) * (0.6 + ((seed * 7 + i * 13) % 10) / 25);
+          const len = maxLen * (0.55 + 0.45 * ((i * 37 + seed * 11) % 10) / 10) * (i < 2 ? 0.75 : 1);
+          drawLeaf(c, x, by, -Math.PI / 2 + spread + side * droop * 0.9, len, 3 + len * 0.13, lobedLeaf, i % 3 === 0 ? mix(col, '2f7d32', 0.25) : col);
+        }
+      } else if (pl.look === 'lettuce') {
+        const n = Math.round(3 + size * 9), maxLen = (16 + 48 * size) * sc;
+        for (let i = 0; i < n; i++) {
+          const k = i / Math.max(1, n - 1), side = i % 2 ? 1 : -1;
+          const spread = side * (0.2 + 1.15 * (1 - k)) * (0.65 + ((seed * 5 + i * 11) % 10) / 30);
+          const len = maxLen * (0.6 + 0.4 * (1 - k * 0.6)) * (0.85 + ((i * 29 + seed) % 10) / 60);
+          drawLeaf(c, x, by, -Math.PI / 2 + spread + side * droop * 0.9, len, len * 0.3, broadLeaf, mix(col, 'd8eeb0', k * 0.45), 'rgba(255,255,255,.5)');
+        }
+      } else if (pl.look === 'spinach') {
+        const n = Math.round(2 + size * 7), maxLen = (16 + 52 * size) * sc;
+        for (let i = 0; i < n; i++) {
+          const k = i / Math.max(1, n - 1), side = i % 2 ? 1 : -1;
+          const spread = side * (0.3 + 1.1 * (1 - k)) * (0.7 + ((seed * 3 + i * 7) % 10) / 30);
+          const len = maxLen * (0.65 + 0.35 * ((i * 41 + seed * 3) % 10) / 10);
+          drawLeaf(c, x, by, -Math.PI / 2 + spread + side * droop * 0.9, len, len * 0.2, spadeLeaf, i % 2 ? col : mix(col, '1f4a1f', 0.2), 'rgba(220,240,200,.45)');
+        }
+      } else if (pl.look === 'basil') {
+        const H = Math.min(80, (8 + 62 * size) * sc), nodes = 1 + Math.floor(size * 4.5);
+        c.strokeStyle = dark; c.lineWidth = 2.2;
+        c.beginPath(); c.moveTo(x, y - stem); c.quadraticCurveTo(x + droop * 8, y - stem - H * 0.6, x + droop * 14, y - stem - H); c.stroke();
+        for (let i = 0; i < nodes; i++) {
+          const f = (i + 1) / (nodes + 0.5), nx = x + droop * 14 * f * f, ny = y - stem - H * f;
+          const len = (9 + 20 * size) * (1 - (i / (nodes + 2)) * 0.5) * Math.min(1.3, sc);
+          [-1, 1].forEach((s) => drawLeaf(c, nx, ny, -Math.PI / 2 + s * (1.0 + droop * 0.8), len, len * 0.34, ovalLeaf, i % 2 ? col : mix(col, '2f7d32', 0.2), 'rgba(255,255,255,.35)'));
+          if (size > 0.55 && i === 1) {
+            [-1, 1].forEach((s) => {
+              const ex = nx + s * len * 0.9, ey = ny - len * 0.7;
+              c.strokeStyle = dark; c.lineWidth = 1.4; c.beginPath(); c.moveTo(nx, ny); c.lineTo(ex, ey); c.stroke();
+              [-1, 1].forEach((q) => drawLeaf(c, ex, ey, -Math.PI / 2 + q * 0.9, len * 0.55, len * 0.2, ovalLeaf, col, 'rgba(255,255,255,.35)'));
+            });
+          }
+        }
+        const tx = x + droop * 14, ty = y - stem - H;
+        [-1, 1].forEach((s) => drawLeaf(c, tx, ty, -Math.PI / 2 + s * 0.45, 7 + 6 * size, 2.6 + 2 * size, ovalLeaf, mix(col, 'a6d67e', 0.4)));
+      }
     }
   }
+  if (v.bolted) {
+    // цветонос с цветками
+    const top = Math.min(95, 60 * sc + 30);
+    c.strokeStyle = '#4f7f3a'; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(x, y - 6); c.quadraticCurveTo(x + 6, y - top * 0.6, x + 2, y - top); c.stroke();
+    for (let j = 0; j < 4; j++) {
+      const fy = y - top * 0.7 - j * 9, fx = x + 4 - j;
+      c.fillStyle = '#' + pl.flower; c.beginPath(); c.arc(fx, fy, 3.2, 0, Math.PI * 2); c.fill();
+      if (pl.look === 'arugula') { c.strokeStyle = '#6a3f9c'; c.lineWidth = 0.8; c.beginPath(); c.moveTo(fx - 2, fy); c.lineTo(fx + 2, fy); c.stroke(); }
+    }
+  }
+}
+function plantView() {
+  const p = S.plant;
+  const pr = problems(S.gameTime);
+  return {
+    type: S.plantType, growth: p.growth, health: p.dead ? 0 : p.health, dead: !!p.dead, bolted: p.bolted, exhausted: !!p.exhausted,
+    pale: S.lightYesterday < P().light[0] - 3 && !lampAuto() && p.growth > 10,
+    thirsty: pr.some((q) => q.k === 'empty' || q.k === 'low'),
+  };
+}
+// Картинки растений для окна выбора
+const plantIcons = {};
+function plantIcon(id) {
+  if (plantIcons[id] !== undefined) return plantIcons[id];
+  const cnv = document.createElement('canvas');
+  cnv.width = 280; cnv.height = 220;
+  const g = cnv.getContext('2d');
+  g.scale(2, 2);
+  g.fillStyle = '#7c5b45';
+  g.beginPath(); g.moveTo(54, 96); g.lineTo(86, 96); g.lineTo(80, 110); g.lineTo(60, 110); g.closePath(); g.fill();
+  drawPlant(g, 70, 96, 2, { type: id, growth: 88, health: 100 });
+  try { plantIcons[id] = cnv.toDataURL('image/png'); } catch (e) { plantIcons[id] = ''; }
+  return plantIcons[id];
+}
+function openPlantPicker(replace) {
+  const cur = S.plant, alive = !cur.dead && !cur.exhausted && cur.growth > 0;
+  const lvlClass = (l) => (l === 'Сложно' ? 'hard' : l === 'Средне' ? 'mid' : '');
+  openModal(`<h2>Что посадим?</h2>
+    <p class="muted" style="margin:0">${replace && alive ? `Сейчас растёт: ${P().name.toLowerCase()}. Если посадить новое растение, старое уберём, а раствор заменим.` : 'У каждого растения свои условия: свет, тепло и раствор. Выбирай по силам!'}</p>
+    <div class="picker">${PLANT_ORDER.map((id) => {
+      const pl = PLANTS[id];
+      return `<button class="pick ${replace && alive && id === S.plantType ? 'current' : ''}" data-plant="${id}">
+        <img src="${plantIcon(id)}" alt="" width="70" height="55">
+        <span class="pick-body"><b>${pl.name}</b><i>${pl.latin}</i>
+          <span class="pick-about">${pl.about}</span>
+          <span class="pick-params">урожай через ~${pl.days} дней · ${tRange(pl.temp)} · свет ${range(pl.light, 0)} ч · pH ${range(pl.ph)} · EC ${range(pl.ec)}</span></span>
+        <span class="lvl ${lvlClass(pl.level)}">${pl.level}</span>
+      </button>`;
+    }).join('')}</div>
+    <button class="btn ghost" data-close>Отмена</button>`);
 }
 function drawScene() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -922,7 +1222,7 @@ function drawScene() {
   // подоконник и батарея
   ctx.fillStyle = '#f4f2ea'; ctx.fillRect(22, sillY, 356, 12);
   ctx.fillStyle = '#e1ddd0'; ctx.fillRect(22, sillY + 12, 356, 4);
-  if (!S.upgrades.shelf) {
+  if (!(S.upgrades.shelf && S.onShelf)) {
     ctx.fillStyle = t < S.heatUntil ? '#efe1d6' : '#eceeea';
     for (let i = 0; i < 9; i++) ctx.fillRect(110 + i * 20, 220, 16, 52);
     ctx.fillStyle = '#c9ccc4'; ctx.fillRect(106, 268, 188, 5);
@@ -1004,7 +1304,8 @@ function drawScene() {
     for (let k = 0; k < 3; k++) { const yy = lidY + k * 6; ctx.beginPath(); ctx.moveTo(cx - 13 + k * 1.5, yy); ctx.lineTo(cx + 13 - k * 1.5, yy); ctx.stroke(); }
   });
   // растения
-  cups.forEach((cx, i) => drawPlant(cx, lidY - 6, i + 1));
+  const pv = plantView();
+  cups.forEach((cx, i) => drawPlant(ctx, cx, lidY - 6, i + 1, pv));
   // бутыль автодолива
   if (S.upgrades.autofill) {
     ctx.fillStyle = 'rgba(220,236,245,.9)'; ctx.strokeStyle = '#2c82b0'; ctx.lineWidth = 1.5;
@@ -1047,9 +1348,16 @@ function toast(msg) {
 function openModal(html) { $('modal').innerHTML = html; $('modalBg').hidden = false; const b = $('modal').querySelector('button'); if (b) b.focus(); }
 function closeModal() { $('modalBg').hidden = true; }
 $('modalBg').addEventListener('click', (e) => {
-  if (e.target.id === 'modalBg' || e.target.closest('[data-close]')) { closeModal(); render(); }
+  if (e.target.id === 'modalBg' || e.target.closest('[data-close]')) { closeModal(); render(); return; }
   const m = e.target.closest('[data-mode]');
-  if (m) { setSpeed(+m.dataset.mode); S.seenIntro = true; closeModal(); save(); render(); }
+  if (m) {
+    setSpeed(+m.dataset.mode); S.seenIntro = true; save(); render();
+    if (!S.picked) openPlantPicker(false); else closeModal();
+    return;
+  }
+  if (e.target.closest('[data-pickopen]')) { openPlantPicker(false); return; }
+  const pk = e.target.closest('[data-plant]');
+  if (pk) { tick(); plantSeed(pk.dataset.plant); closeModal(); checkAchievements(); save(); render(); }
 });
 
 function setSpeed(v) {
@@ -1059,19 +1367,20 @@ function setSpeed(v) {
 }
 
 function stageName() {
-  const p = S.plant;
+  const p = S.plant, pl = P();
   if (p.dead) return 'Растение погибло';
   if (p.exhausted) return 'Урожай собран полностью';
-  if (p.bolted) return 'Руккола цветёт (стрелкуется)';
-  let s = STAGES[0].name; STAGES.forEach((x) => { if (p.growth >= x.at) s = x.name; });
+  if (p.bolted) return pl.boltTitle;
+  const st = stagesOf(pl);
+  let s = st[0].name; st.forEach((x) => { if (p.growth >= x.at) s = x.name; });
   return s;
 }
 function plantFacts() {
-  const p = S.plant, g = p.growth;
+  const p = S.plant, g = p.growth, pl = P();
   const days = Math.floor((S.gameTime - p.planted) / DAY) + 1;
-  const height = g < 10 ? 0 : 1 + 17 * Math.pow(clamp((g - 10) / 90, 0, 1), 0.9);
+  const height = g < 10 ? 0 : 0.5 + (pl.maxH - 0.5) * Math.pow(clamp((g - 10) / 90, 0, 1), 0.9);
   const leaves = g < 20 ? 0 : Math.round(1 + clamp((g - 20) / 80, 0, 1) * 8);
-  return `День ${days} · ${fmt(height)} см · листьев: ${leaves}`;
+  return `День ${days} · ${fmt(height)} см${pl.look === 'cress' ? '' : ` · листьев: ${leaves}`}`;
 }
 function statusChip(level, text) { return `<span class="chip ${level === 2 ? 'bad' : level === 1 ? 'warn' : ''}">${text}</span>`; }
 
@@ -1084,6 +1393,8 @@ function renderGarden() {
   const sp = SPEEDS.find((s) => s.v === S.speed);
   $('speedPill').hidden = S.speed === 1;
   $('speedPill').textContent = sp ? sp.name : '';
+  const pl = P();
+  $('plantName').innerHTML = `${pl.name} <i>${pl.latin}</i>`;
   $('stage').textContent = stageName();
   $('facts').textContent = p.dead ? '' : plantFacts();
   $('hbar').style.width = (p.dead ? 0 : p.health) + '%';
@@ -1096,13 +1407,13 @@ function renderGarden() {
   const top = pr[0];
   const al = $('alert');
   if (p.exhausted) {
-    al.className = 'alert'; al.innerHTML = '<b>Растение отдало весь урожай</b><p>Посей новые семена — и всё начнётся сначала. Свежий раствор нальётся автоматически.</p>';
+    al.className = 'alert'; al.innerHTML = '<b>Растение отдало весь урожай</b><p>Нажми «Посадить» и выбери новое растение. Свежий раствор нальётся автоматически.</p>';
   } else if (top) {
-    const [h, txt] = ADVICE[top.k];
+    const [h, txt] = advice(top.k);
     al.className = 'alert sev' + top.sev;
     al.innerHTML = `<b>${h}</b><p>${txt}</p>`;
   } else {
-    const all = TIPS.flatMap((g) => g.items);
+    const all = [...pl.tips, ...TIPS.flatMap((g) => g.items)];
     const tip = all[Math.floor(t / (3 * HOUR)) % all.length];
     al.className = 'alert';
     al.innerHTML = `<b>Всё в порядке</b><p>${tip}</p>`;
@@ -1111,11 +1422,10 @@ function renderGarden() {
   // приборы
   const f = fill(), lo = minFill(), hi = maxFill();
   const wl = S.water < 0.08 ? 2 : f < lo ? 2 : f > hi + 0.02 && p.growth > 12 && !S.upgrades.aerator ? 2 : 0;
-  const ph = S.ph, phL = ph < 5.0 || ph > 7.5 ? 2 : ph < 5.6 || ph > 7.0 ? 1 : 0;
-  const e = ec(), [eLo, eHi] = ecRange();
-  const ecL = e > eHi + 0.9 ? 2 : e > eHi ? 1 : p.growth > 15 && e < eLo - 0.3 ? 2 : p.growth > 15 && e < eLo ? 1 : 0;
-  const T = tempNow(t), TL = T > 26 ? 2 : T > 24 || T < 14 ? 1 : 0;
-  const lightT = S.lightToday, lightL = !lampAuto() && S.lightYesterday < 9 && p.growth >= 10 ? 1 : 0;
+  const ph = S.ph, phL = phLevel();
+  const e = ec(), [eLo, eHi] = ecRange(), eSigned = ecLevel(), ecL = Math.abs(eSigned);
+  const T = tempNow(t), tL = tempLevel(T), TL = Math.abs(tL);
+  const lightT = S.lightToday, lightL = !lampAuto() && S.lightYesterday < pl.light[0] - 3 && p.growth >= 10 ? 1 : 0;
   const L = lightNow(t);
   const phVal = S.upgrades.phmeter ? fmt(ph, 1) : '≈ ' + fmt(Math.round(ph * 2) / 2, 1);
   const ecVal = S.upgrades.ecmeter ? fmt(e, 2) : (e > eHi ? 'много' : e < eLo ? 'мало' : 'норма');
@@ -1123,10 +1433,10 @@ function renderGarden() {
     <div class="gauge"><span class="lbl">Раствор</span><span class="val">${fmt(S.water, 2)} л</span>
       <div class="tank"><div class="zone" style="left:${lo * 100}%;width:${(hi - lo) * 100}%"></div><div class="lvl" style="width:${f * 100}%"></div></div>
       ${statusChip(wl, wl ? (f < lo ? 'мало' : 'нет зазора') : 'норма')}</div>
-    <div class="gauge"><span class="lbl">pH</span><span class="val">${phVal}</span><span class="sub">${S.upgrades.phmeter ? 'pH-метр' : 'тест-полоска'} · норма 6,0–6,8</span>${statusChip(phL, phL ? (ph < 6 ? 'кислый' : 'щелочной') : 'норма')}</div>
-    <div class="gauge"><span class="lbl">EC, мСм/см</span><span class="val">${ecVal}</span><span class="sub">норма ${fmt(eLo, 1)}–${fmt(eHi, 1)}</span>${statusChip(ecL, ecL ? (e > eHi ? 'крепкий' : 'слабый') : 'норма')}</div>
-    <div class="gauge"><span class="lbl">Свет</span><span class="val">${L > 0.15 ? (lampIsOn(t) ? 'лампа' : 'окно') : 'темно'}</span><span class="sub">сегодня ${fmt(lightT, 1)} ч, вчера ${fmt(S.lightYesterday, 1)} ч</span>${statusChip(lightL, lightL ? 'мало' : 'цель 12–14 ч')}</div>
-    <div class="gauge"><span class="lbl">Воздух</span><span class="val">${fmt(T, 1)} °С</span><span class="sub">норма +16…+20 °С${t < S.ventUntil ? ' · проветриваем' : ''}</span>${statusChip(TL, TL ? (T < 16 ? 'прохладно' : 'жарко') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">pH</span><span class="val">${phVal}</span><span class="sub">${S.upgrades.phmeter ? 'pH-метр' : 'тест-полоска'} · норма ${range(pl.ph)}</span>${statusChip(phL, phL ? (ph < pl.ph[0] ? 'кислый' : 'щелочной') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">EC, мСм/см</span><span class="val">${ecVal}</span><span class="sub">норма ${fmt(eLo, 1)}–${fmt(eHi, 1)}</span>${statusChip(ecL, ecL ? (eSigned > 0 ? 'крепкий' : 'слабый') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">Свет</span><span class="val">${L > 0.15 ? (lampIsOn(t) ? 'лампа' : 'окно') : 'темно'}</span><span class="sub">сегодня ${fmt(lightT, 1)} ч, вчера ${fmt(S.lightYesterday, 1)} ч</span>${statusChip(lightL, lightL ? 'мало' : `цель ${range(pl.light, 0)} ч`)}</div>
+    <div class="gauge"><span class="lbl">Воздух</span><span class="val">${fmt(T, 1)} °С</span><span class="sub">норма ${tRange(pl.temp)}${t < S.ventUntil ? ' · проветриваем' : ''}</span>${statusChip(TL, TL ? (tL < 0 ? 'прохладно' : 'жарко') : 'норма')}</div>
     <div class="gauge"><span class="lbl">Корни</span><span class="val">${S.upgrades.aerator ? 'аэратор' : fmt((1 - f) * 100, 0) + ' %'}</span><span class="sub">${S.upgrades.aerator ? 'пузырьки дают кислород' : 'воздуха в баке над раствором'}</span>${statusChip(problems(t).some((q) => q.k === 'overfill') ? 2 : 0, problems(t).some((q) => q.k === 'overfill') ? 'душно' : 'дышат')}</div>`);
 
   // действия
@@ -1142,7 +1452,7 @@ function renderGarden() {
     <button class="act" data-act="vent">${I.vent}Проветрить</button>
     <button class="act" data-act="solution">${I.swap}Новый раствор<span class="price">5 ${I.leaf}</span></button>
     ${needSow
-      ? `<button class="act primary" data-act="sow">${I.seed}Посеять</button>`
+      ? `<button class="act primary" data-act="sow">${I.seed}Посадить</button>`
       : `<button class="act ${canCut ? 'primary' : ''}" data-act="cut" ${canCut ? '' : 'disabled'}>${I.cut}Срезать урожай</button>`}`);
 }
 
@@ -1199,16 +1509,23 @@ function renderTasks() {
 function renderShop() {
   setHTML($('shop'), SHOP.map((u) => {
     const have = S.upgrades[u.id];
+    const owned = u.id === 'shelf'
+      ? `<button class="btn ghost" data-toggle-shelf>${S.onShelf ? 'Переставить на подоконник' : 'Переставить на полку'}</button>`
+      : '<span class="done-badge">Уже в огороде</span>';
     return `<div class="card item"><div class="ico">${u.ico}</div><div><h3>${u.name}</h3><p>${u.d}</p>
       <div class="row"><span class="price">${u.price} ${I.leaf}</span>
-      ${have ? '<span class="done-badge">Уже в огороде</span>' : `<button class="btn ${S.coins >= u.price ? 'violet' : 'ghost'}" data-buy="${u.id}">Купить</button>`}</div></div></div>`;
+      ${have ? owned : `<button class="btn ${S.coins >= u.price ? 'violet' : 'ghost'}" data-buy="${u.id}">Купить</button>`}</div></div></div>`;
   }).join(''));
 }
 function renderTips() {
-  $('tips').innerHTML = TIPS.map((g) => `<div class="card"><h3>${g.h}</h3><ul>${g.items.map((x) => `<li>${x}</li>`).join('')}</ul></div>`).join('');
+  const pl = P();
+  const own = `<div class="card"><h3>${pl.name} <i class="muted" style="font-family:var(--font-body);font-weight:500">${pl.latin}</i></h3>
+    <p class="muted" style="margin:0">Свет ${range(pl.light, 0)} ч · ${tRange(pl.temp)} · pH ${range(pl.ph)} · EC ${range(pl.ec)} мСм/см · урожай через ~${pl.days} дней</p>
+    <ul>${pl.tips.map((x) => `<li>${x}</li>`).join('')}</ul></div>`;
+  $('tips').innerHTML = own + TIPS.map((g) => `<div class="card"><h3>${g.h}</h3><ul>${g.items.map((x) => `<li>${x}</li>`).join('')}</ul></div>`).join('');
 }
 function renderMore() {
-  setHTML($('stats'), `<div><b>${S.stats.grams}</b><span>граммов рукколы</span></div><div><b>${S.stats.harvests}</b><span>срезов</span></div><div><b>${Object.keys(S.upgrades).length}/${SHOP.length}</b><span>улучшений</span></div>`);
+  setHTML($('stats'), `<div><b>${S.stats.grams}</b><span>граммов зелени</span></div><div><b>${S.stats.harvests}</b><span>срезов</span></div><div><b>${Object.keys(S.upgrades).length}/${SHOP.length}</b><span>улучшений</span></div>`);
   setHTML($('modes'), SPEEDS.map((s) => `<button data-speed="${s.v}" aria-pressed="${S.speed === s.v}"><b>${s.name}</b><span>${s.hint}</span></button>`).join(''));
   setHTML($('log'), S.log.length ? S.log.map((l) => {
     const d = new Date(l.t);
@@ -1223,7 +1540,7 @@ function renderTabs() {
 function render() {
   setHTML($('coins'), `${I.leaf}<span>${S.coins}</span>`);
   const sp = SPEEDS.find((s) => s.v === S.speed);
-  $('subtitle').textContent = sp && S.speed > 1 ? `Режим: ${sp.name.toLowerCase()}` : 'Руккола без почвы · реальное время';
+  $('subtitle').textContent = `${P().name} без почвы · ${sp && S.speed > 1 ? 'режим «' + sp.name.toLowerCase() + '»' : 'реальное время'}`;
   ['garden', 'tasks', 'shop', 'tips', 'more'].forEach((v) => { $('view-' + v).hidden = v !== view; });
   renderTabs();
   if (view === 'garden') { renderGarden(); drawScene(); }
@@ -1251,6 +1568,12 @@ document.addEventListener('click', (e) => {
   if (b.dataset.view) return go(b.dataset.view);
   if (b.dataset.act) { tick(); ACTIONS[b.dataset.act](); checkAchievements(); save(); render(); return; }
   if (b.dataset.buy) return buy(b.dataset.buy);
+  if (b.hasAttribute('data-toggle-shelf')) {
+    tick(); S.onShelf = !S.onShelf;
+    addLog(S.gameTime, S.onShelf ? 'Переставили эко-бокс на полку, подальше от батареи.' : 'Вернули эко-бокс на подоконник над батареей.');
+    toast(S.onShelf ? 'Эко-бокс на полке: здесь на 2 °С прохладнее.' : 'Эко-бокс на подоконнике: над батареей теплее.');
+    save(); render(); return;
+  }
   if (b.dataset.ttab) { taskTab = b.dataset.ttab; quizPicked = null; renderTasks(); return; }
   if (b.dataset.hint) {
     if (S.coins < 3) return toast('Нужно 3 листика на подсказку.');
@@ -1295,11 +1618,11 @@ document.addEventListener('submit', (e) => {
 
 function showIntro() {
   openModal(`<h2>Гидро-огород</h2>
-    <p style="margin:0">Вырасти рукколу без почвы — в эко-боксе на подоконнике обычной квартиры. Растение растёт в реальном времени, даже когда игра закрыта.</p>
+    <p style="margin:0">Выбери растение и вырасти его без почвы — в эко-боксе на подоконнике обычной квартиры. Растение растёт в реальном времени, даже когда игра закрыта.</p>
     <ul>
       <li>Следи за раствором: уровень, кислотность (pH) и крепость (EC).</li>
-      <li>Включай фитолампу на 12–14 часов, ночью выключай.</li>
-      <li>Держи прохладу +16…+20 °С и не заливай корни до крышки — им нужен воздух.</li>
+      <li>Включай фитолампу днём и выключай ночью — у каждого растения своя норма света.</li>
+      <li>Следи за температурой и не заливай корни до крышки — им нужен воздух.</li>
       <li>Отгадывай ребусы, загадки и вопросы — получай листики и покупай улучшения.</li>
     </ul>
     <h3>Выбери скорость времени</h3>
@@ -1308,15 +1631,15 @@ function showIntro() {
 }
 
 // ===================== ЗАПУСК =====================
-function start(data) {
-  S = load(data && data.state);
+function start() {
+  S = load();
   const now = Date.now();
   const away = now - S.lastReal;
   const before = { health: S.plant.health, water: S.water, growth: S.plant.growth };
   tick();
   if (away > 30 * 60e3 && S.seenIntro) {
     const g = S.plant.growth - before.growth;
-    toast(`Пока тебя не было: руккола подросла на ${fmt(Math.max(0, g), 0)}%, выпила ${fmt(Math.max(0, before.water - S.water), 2)} л раствора.`);
+    toast(`Пока тебя не было: растение подросло на ${fmt(Math.max(0, g), 0)}% и выпило ${fmt(Math.max(0, before.water - S.water), 2)} л раствора.`);
   }
   // ежедневный бонус
   const today = new Date().toDateString();
@@ -1335,9 +1658,9 @@ function start(data) {
   if (!reduceMotion) requestAnimationFrame(loop);
   window.addEventListener('resize', () => { if (view === 'garden') drawScene(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
-  if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ state: S }));
 }
-if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
-else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+start();
 })();
 </script>
+</body>
+</html>
