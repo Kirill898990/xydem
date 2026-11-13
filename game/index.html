@@ -1,0 +1,1343 @@
+<title>Гидро-огород</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#e7ece3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Макет: одна колонка «подоконник» — сцена с эко-боксом сверху, приборы и действия под ней, вкладки снизу */
+:root {
+  --wall: #e7ece3;
+  --card: #fbfcf8;
+  --ink: #18301e;
+  --muted: #56685b;
+  --line: #d2dbcd;
+  --leaf: #3e8e3a;
+  --leaf-deep: #24572a;
+  --leaf-soft: #e1eedb;
+  --water: #2c82b0;
+  --water-soft: #dcecf5;
+  --sun: #e9a91f;
+  --violet: #6a3f9c;
+  --violet-soft: #ece4f6;
+  --warn: #b86a12;
+  --warn-soft: #fbefdc;
+  --bad: #b8392a;
+  --bad-soft: #f8e1dc;
+  --font-display: 'Unbounded', 'Manrope', system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --r: 14px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--wall);
+  color: var(--ink);
+  font: 500 15px/1.45 var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px calc(86px + env(safe-area-inset-bottom, 0px));
+}
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-block: 4px 10px;
+}
+.brand { font: 700 19px/1.1 var(--font-display); letter-spacing: -0.01em; color: var(--leaf-deep); }
+.brand small { display: block; font: 600 12px/1.3 var(--font-body); color: var(--muted); letter-spacing: 0; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.coins {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--violet-soft); color: var(--violet);
+  border-radius: 999px; padding: 6px 12px 6px 8px;
+  font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.coins svg { width: 20px; height: 20px; }
+.view { display: grid; gap: 12px; }
+.scene-wrap { position: relative; border-radius: var(--r); overflow: hidden; background: #cfd8cb; box-shadow: 0 1px 0 var(--line); }
+canvas#scene { display: block; width: 100%; height: auto; aspect-ratio: 400 / 290; }
+.clock-pill {
+  position: absolute; left: 10px; top: 10px;
+  background: rgba(24, 48, 30, 0.78); color: #fff;
+  border-radius: 999px; padding: 4px 10px;
+  font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.speed-pill { left: auto; right: 10px; background: rgba(106, 63, 156, 0.85); }
+.status {
+  background: var(--card); border-radius: var(--r); padding: 12px 14px;
+  display: grid; gap: 8px;
+}
+.status-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.stage { font: 700 15px/1.25 var(--font-display); color: var(--leaf-deep); text-wrap: balance; }
+.facts { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.health { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: 13px; color: var(--muted); }
+.bar { height: 8px; border-radius: 99px; background: var(--leaf-soft); overflow: hidden; }
+.bar > i { display: block; height: 100%; border-radius: 99px; background: var(--leaf); transition: width .4s; }
+.alert {
+  border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px;
+  background: var(--leaf-soft); border-left: 5px solid var(--leaf);
+}
+.alert.sev1 { background: var(--warn-soft); border-color: var(--warn); }
+.alert.sev2, .alert.sev3 { background: var(--bad-soft); border-color: var(--bad); }
+.alert b { font-weight: 800; }
+.alert p { margin: 0; font-size: 14px; color: var(--ink); }
+.alert .src { font-size: 12px; color: var(--muted); }
+.gauges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.gauge { background: var(--card); border-radius: 12px; padding: 9px 10px; display: grid; gap: 4px; min-width: 0; }
+.gauge .lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.gauge .val { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gauge .sub { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.chip { justify-self: start; font-size: 11px; font-weight: 800; border-radius: 99px; padding: 1px 8px; background: var(--leaf-soft); color: var(--leaf-deep); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+.tank { position: relative; height: 8px; border-radius: 99px; background: #e9eee6; overflow: hidden; }
+.tank .zone { position: absolute; top: 0; bottom: 0; background: rgba(62, 142, 58, 0.25); }
+.tank .lvl { position: absolute; top: 0; bottom: 0; left: 0; background: var(--water); border-radius: 99px; opacity: .85; }
+.actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.act {
+  border: 0; border-radius: 12px; background: var(--card); padding: 10px 4px 8px;
+  display: grid; justify-items: center; gap: 4px; font-size: 12px; font-weight: 700; line-height: 1.15; text-align: center;
+  box-shadow: 0 1px 0 var(--line); transition: transform .1s, background .2s;
+}
+.act:active { transform: scale(0.96); }
+.act svg { width: 26px; height: 26px; }
+.act.on { background: #fff4d6; }
+.act.primary { background: var(--leaf); color: #fff; }
+.act[disabled] { opacity: .45; cursor: default; }
+.act.wide { grid-column: span 2; grid-auto-flow: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; padding: 12px; }
+h2 { font: 700 18px/1.2 var(--font-display); margin: 6px 0 0; color: var(--leaf-deep); text-wrap: balance; }
+h3 { font: 700 15px/1.25 var(--font-display); margin: 0; text-wrap: balance; }
+.lead { margin: 0; color: var(--muted); font-size: 14px; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg button {
+  border: 1.5px solid var(--line); background: var(--card); border-radius: 99px; padding: 6px 12px;
+  font-weight: 700; font-size: 13px;
+}
+.seg button[aria-pressed="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: #fff; }
+.card { background: var(--card); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.rebus { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; padding: 10px 0; }
+.rpart { display: inline-flex; align-items: flex-end; gap: 2px; }
+.rpart .pic { font-size: 54px; line-height: 1; }
+.rpart .com { font: 800 40px/0.6 var(--font-body); color: var(--violet); letter-spacing: 3px; }
+.rpart .let { font: 700 34px/1 var(--font-display); color: var(--leaf-deep); border: 2px dashed var(--line); border-radius: 10px; padding: 8px 10px; }
+.rplus { font: 700 26px var(--font-display); color: var(--muted); }
+.answer { display: flex; gap: 8px; }
+.answer input {
+  flex: 1; min-width: 0; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  font: 700 16px var(--font-body); text-transform: uppercase; background: #fff; color: var(--ink);
+}
+.btn { border: 0; border-radius: 10px; padding: 10px 14px; background: var(--leaf); color: #fff; font-weight: 800; }
+.btn.ghost { background: var(--leaf-soft); color: var(--leaf-deep); }
+.btn.violet { background: var(--violet); }
+.btn[disabled] { opacity: .5; cursor: default; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.muted { color: var(--muted); font-size: 13px; }
+.done-badge { font-size: 12px; font-weight: 800; color: var(--leaf-deep); background: var(--leaf-soft); border-radius: 99px; padding: 2px 9px; }
+.opts { display: grid; gap: 8px; }
+.opts button {
+  text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 10px; padding: 10px 12px; font-weight: 600;
+}
+.opts button.right { border-color: var(--leaf); background: var(--leaf-soft); }
+.opts button.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.riddle { white-space: pre-line; font-weight: 600; font-size: 15px; }
+.shop { display: grid; gap: 10px; }
+.item { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; }
+.item .ico { width: 52px; height: 52px; border-radius: 12px; background: var(--leaf-soft); display: grid; place-items: center; }
+.item .ico svg { width: 32px; height: 32px; }
+.item p { margin: 2px 0 8px; font-size: 13.5px; color: var(--muted); }
+.price { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; color: var(--violet); font-variant-numeric: tabular-nums; }
+.price svg { width: 16px; height: 16px; }
+.tips { display: grid; gap: 10px; }
+.tips ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.log { display: grid; gap: 6px; font-size: 13px; max-height: 300px; overflow: auto; }
+.log div { display: grid; grid-template-columns: 92px 1fr; gap: 8px; }
+.log time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.stats b { display: block; font: 700 20px var(--font-display); color: var(--leaf-deep); font-variant-numeric: tabular-nums; }
+.stats span { font-size: 12px; color: var(--muted); }
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--card); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: max(8px, env(safe-area-inset-left, 0px));
+  padding-right: max(8px, env(safe-area-inset-right, 0px));
+}
+.tabs-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tab {
+  border: 0; background: none; padding: 8px 2px 9px; display: grid; justify-items: center; gap: 2px;
+  font-size: 11px; font-weight: 700; color: var(--muted); position: relative;
+}
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-current="page"] { color: var(--leaf-deep); }
+.tab[aria-current="page"]::after { content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--leaf); }
+.tab .dot { position: absolute; top: 6px; right: calc(50% - 18px); width: 8px; height: 8px; border-radius: 50%; background: var(--violet); }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 40;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  width: min(520px, calc(100% - 32px));
+  background: var(--ink); color: #fff; border-radius: 12px; padding: 11px 14px; font-weight: 600; font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+.modal-bg {
+  position: fixed; inset: 0; z-index: 50; background: rgba(24, 48, 30, .55);
+  display: grid; place-items: center; padding: 16px;
+}
+.modal { background: var(--card); border-radius: 18px; padding: 18px; width: min(480px, 100%); max-height: 90vh; overflow: auto; display: grid; gap: 12px; }
+.modal h2 { margin: 0; }
+.modal ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.modes { display: grid; gap: 8px; }
+.modes button { text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 10px 12px; }
+.modes button b { display: block; }
+.modes button span { font-size: 13px; color: var(--muted); }
+.modes button[aria-pressed="true"] { border-color: var(--leaf); background: var(--leaf-soft); }
+@media (max-width: 380px) {
+  .gauges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .act.wide { grid-column: span 3; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">Гидро-огород<small id="subtitle">Руккола без почвы</small></div>
+    <div class="coins" id="coins" title="Листики — награда за задания"></div>
+  </header>
+
+  <main>
+    <!-- ОГОРОД -->
+    <section class="view" id="view-garden" aria-label="Огород">
+      <div class="scene-wrap">
+        <canvas id="scene" width="800" height="580" aria-label="Эко-бокс с рукколой на подоконнике"></canvas>
+        <div class="clock-pill" id="clock"></div>
+        <div class="clock-pill speed-pill" id="speedPill" hidden></div>
+      </div>
+      <div class="status">
+        <div class="status-row">
+          <div class="stage" id="stage"></div>
+          <div class="facts" id="facts"></div>
+        </div>
+        <div class="health"><span>Здоровье</span><div class="bar"><i id="hbar"></i></div><b id="hval"></b></div>
+        <div class="health"><span>Рост</span><div class="bar"><i id="gbar" style="background:var(--violet)"></i></div><b id="gval"></b></div>
+      </div>
+      <div class="alert" id="alert" role="status"></div>
+      <div class="gauges" id="gauges"></div>
+      <div class="actions" id="actions"></div>
+    </section>
+
+    <!-- ЗАДАНИЯ -->
+    <section class="view" id="view-tasks" hidden aria-label="Задания">
+      <h2>Задания</h2>
+      <p class="lead">Отгадывай ребусы и загадки о гидропонике, отвечай на вопросы — получай листики и покупай улучшения для огорода.</p>
+      <div class="seg" id="taskSeg"></div>
+      <div id="taskBody" class="view"></div>
+    </section>
+
+    <!-- УЛУЧШЕНИЯ -->
+    <section class="view" id="view-shop" hidden aria-label="Улучшения">
+      <h2>Улучшения для огорода</h2>
+      <p class="lead">Всё это можно купить и в жизни, чтобы выращивать зелень в квартире было проще.</p>
+      <div class="shop" id="shop"></div>
+    </section>
+
+    <!-- СОВЕТЫ -->
+    <section class="view" id="view-tips" hidden aria-label="Советы">
+      <h2>Советы гидропонщика</h2>
+      <p class="lead">Настоящие правила выращивания рукколы без почвы. Они работают и в игре, и дома.</p>
+      <div class="tips" id="tips"></div>
+    </section>
+
+    <!-- ЕЩЁ -->
+    <section class="view" id="view-more" hidden aria-label="Ещё">
+      <h2>Мой огород</h2>
+      <div class="card"><div class="stats" id="stats"></div></div>
+      <div class="card">
+        <h3>Скорость времени</h3>
+        <div class="modes" id="modes"></div>
+        <p class="muted" style="margin:0">В ускоренных режимах фитолампа включается по таймеру сама.</p>
+      </div>
+      <div class="card">
+        <h3>Журнал</h3>
+        <div class="log" id="log"></div>
+      </div>
+      <div class="card">
+        <h3>О проекте</h3>
+        <p class="muted" style="margin:0">Игра сделана учениками 6 класса в рамках проекта «Выращивание рукколы в эко-боксах в условиях школьного кружка». Все советы в игре настоящие: так выращивают зелень методом Кратки — без насосов и без почвы.</p>
+        <p style="margin:0"><a href="https://claude.ai/artifact/1ZhsEctqRTHtfVB5sSG8T1" target="_blank" rel="noopener" style="color:var(--leaf-deep);font-weight:700">Сайт проекта о рукколе</a></p>
+        <div class="row">
+          <button class="btn ghost" id="howBtn">Как играть</button>
+          <button class="btn ghost" id="resetBtn" style="color:var(--bad)">Начать игру заново</button>
+        </div>
+        <div id="resetConfirm" hidden class="row">
+          <span class="muted">Весь прогресс и листики пропадут.</span>
+          <button class="btn" id="resetYes" style="background:var(--bad)">Да, сбросить</button>
+          <button class="btn ghost" id="resetNo">Отмена</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs" aria-label="Разделы">
+    <div class="tabs-in" id="tabs"></div>
+  </nav>
+  <div class="toast" id="toast" hidden role="status"></div>
+  <div class="modal-bg" id="modalBg" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ===================== ИКОНКИ =====================
+const I = {
+  leaf: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z" fill="#6a3f9c"/><path d="M5 19c3-4 6-7 10-10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  water: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z" fill="#2c82b0"/><path d="M9 14a3 3 0 0 0 3 3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  feed: '<svg viewBox="0 0 24 24" fill="none"><rect x="7" y="7" width="10" height="14" rx="3" fill="#3e8e3a"/><rect x="9" y="3" width="6" height="4" rx="1" fill="#24572a"/><path d="M12 11v6M9 14h6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  phDown: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#e9a91f"/><text x="12" y="16" font-size="10" font-weight="800" text-anchor="middle" fill="#18301e" font-family="sans-serif">pH−</text></svg>',
+  phUp: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#2c82b0"/><text x="12" y="16" font-size="10" font-weight="800" text-anchor="middle" fill="#fff" font-family="sans-serif">pH+</text></svg>',
+  lamp: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="5" rx="2" fill="#56685b"/><path d="M6 11l-2 5M12 11v6M18 11l2 5" stroke="#e9a91f" stroke-width="2" stroke-linecap="round"/></svg>',
+  vent: '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#56685b" stroke-width="2"/><path d="M12 3v18M4 12h8" stroke="#56685b" stroke-width="2"/><path d="M15 9c2 0 2 2 4 2M15 13c2 0 2 2 4 2" stroke="#2c82b0" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  cut: '<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="17" r="3" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="17" r="3" stroke="currentColor" stroke-width="2"/><path d="M9 15L18 4M15 15L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  seed: '<svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="15" rx="5" ry="6" fill="#8d6e4a"/><path d="M12 9c0-3 2-5 5-6-1 3-2 5-5 6z" fill="#3e8e3a"/></svg>',
+  swap: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h13l-3-3M20 16H7l3 3" stroke="#2c82b0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  garden: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 14h16l-2 7H6z" fill="currentColor" opacity=".25"/><path d="M4 14h16l-2 7H6zM12 14V8M12 9c-3 0-5-2-5-5 3 0 5 2 5 5zM12 11c3 0 5-2 5-5-3 0-5 2-5 5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  tasks: '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9l2 2 4-4M8 16h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  shop: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 12H6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="1.8"/></svg>',
+  tips: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+};
+
+// ===================== КОНСТАНТЫ =====================
+const HOUR = 3600e3, DAY = 24 * HOUR;
+const TANK = 3.0;              // объём бака, л
+const STEP_H = 1 / 6;          // шаг модели — 10 игровых минут
+const MAX_CATCHUP = 10 * DAY;  // догоняем не больше 10 игровых дней
+const KEY = 'hydro-garden-v1';
+const SPEEDS = [
+  { v: 1, name: 'Реальное время', hint: '1 игровой день = 1 настоящий день. Как в жизни: урожай примерно через 25 дней.' },
+  { v: 24, name: 'Быстро', hint: '1 игровой день = 1 час. Урожай за один день игры.' },
+  { v: 1440, name: 'Демонстрация', hint: '1 игровой день = 1 минута. Для показа на уроке или конференции.' },
+];
+const STAGES = [
+  { at: 0, name: 'Семена в субстрате' },
+  { at: 4, name: 'Проклюнулся корешок' },
+  { at: 10, name: 'Всходы: семядоли' },
+  { at: 20, name: 'Первый настоящий лист' },
+  { at: 35, name: 'Розетка из 4–6 листьев' },
+  { at: 60, name: 'Густая розетка' },
+  { at: 75, name: 'Можно срезать листья' },
+  { at: 100, name: 'Полный урожай' },
+];
+
+// ===================== СОСТОЯНИЕ =====================
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = (n, d = 1) => Number(n).toFixed(d).replace('.', ',');
+function freshPlant(t) {
+  return { planted: t, growth: 0, health: 100, bolt: 0, bolted: false, cuts: 0, dead: false, fullSince: null };
+}
+function newState(now) {
+  return {
+    v: 1, speed: 1, gameTime: now, lastReal: now,
+    coins: 10,
+    plant: freshPlant(now),
+    water: 2.7, nutrients: 2.7 * 0.6, ph: 6.3,
+    lampOn: false, lightToday: 0, lightYesterday: 14,
+    heatUntil: 0, ventUntil: 0, goodDays: 0,
+    upgrades: {}, solved: {}, hints: {}, ach: {},
+    log: [], bonusDay: null, seenIntro: false,
+    stats: { grams: 0, harvests: 0, cycles: 1, tasks: 0 },
+  };
+}
+let S;
+function load(snapshot) {
+  if (snapshot && snapshot.v === 1) return snapshot;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1) return s; }
+  } catch (e) { /* хранилище недоступно — начнём заново */ }
+  return newState(Date.now());
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* без сохранения */ }
+}
+
+// ===================== МОДЕЛЬ =====================
+const hourOf = (t) => { const d = new Date(t); return d.getHours() + d.getMinutes() / 60; };
+const dayKey = (t) => { const d = new Date(t); return d.getFullYear() * 1000 + d.getMonth() * 40 + d.getDate(); };
+const fill = () => S.water / TANK;
+const ec = () => S.nutrients / Math.max(S.water, 0.05);
+const rootDev = () => clamp(S.plant.growth / 70, 0, 1);
+const minFill = () => 0.82 - 0.62 * rootDev();
+const maxFill = () => 0.97 - 0.32 * rootDev();
+const leafArea = () => clamp((S.plant.growth - 8) / 80, 0, 1);
+const lampAuto = () => !!S.upgrades.timer || S.speed > 1;
+function lampIsOn(t) {
+  if (lampAuto()) { const h = hourOf(t); return h >= 7 && h < 21; }
+  return S.lampOn;
+}
+function naturalLight(t) {
+  // ноябрь в Казани: светло примерно с 8 до 16 часов, через стекло света мало
+  const h = hourOf(t);
+  return h < 8 || h >= 16 ? 0 : 0.3 * Math.sin(Math.PI * (h - 8) / 8);
+}
+function lampPower() { return (S.upgrades.led ? 1.2 : 1.0) * (S.upgrades.reflector ? 1.1 : 1); }
+function lightNow(t) { return (lampIsOn(t) ? lampPower() : 0) + naturalLight(t); }
+function tempNow(t) {
+  const h = hourOf(t);
+  let T = 20 + 2 * clamp(Math.sin(Math.PI * (h - 6) / 16), 0, 1);
+  if (!S.upgrades.shelf) T += 2;
+  if (t < S.heatUntil) T += 2.5;
+  if (S.upgrades.fan) T -= 1;
+  if (lampIsOn(t)) T += 0.5;
+  if (t < S.ventUntil) T -= 4;
+  return T;
+}
+function ecRange() { return S.plant.growth < 20 ? [0.4, 1.0] : [0.8, 1.6]; }
+function tempFactor(T) {
+  if (T < 12) return 0.4; if (T < 16) return 0.8; if (T <= 21) return 1;
+  if (T <= 24) return 0.9; if (T <= 26) return 0.75; return 0.55;
+}
+
+// Текущие проблемы растения (используются и моделью, и подсказками)
+function problems(t) {
+  const p = S.plant, out = [];
+  if (p.dead) return [{ k: 'dead', sev: 3, stress: 0 }];
+  const f = fill(), lo = minFill(), hi = maxFill();
+  if (S.water < 0.08) out.push({ k: 'empty', sev: 3, stress: 3 });
+  else if (f < lo) out.push({ k: 'low', sev: 2, stress: 0.5 + (lo - f) * 4 });
+  if (f > hi + 0.02 && p.growth > 12 && !S.upgrades.aerator) out.push({ k: 'overfill', sev: 2, stress: 0.8 });
+  const ph = S.ph;
+  if (ph < 5.0) out.push({ k: 'phLow', sev: 2, stress: 1.0 });
+  else if (ph > 7.5) out.push({ k: 'phHigh', sev: 2, stress: 1.0 });
+  else if (ph < 5.6) out.push({ k: 'phLow', sev: 1, stress: 0.3 });
+  else if (ph > 7.0) out.push({ k: 'phHigh', sev: 1, stress: 0.3 });
+  const e = ec(), [eLo, eHi] = ecRange();
+  if (e > eHi + 0.9) out.push({ k: 'ecHigh', sev: 2, stress: 1.2 });
+  else if (e > eHi) out.push({ k: 'ecHigh', sev: 1, stress: 0.3 });
+  else if (p.growth > 15 && e < eLo - 0.3) out.push({ k: 'ecLow', sev: 2, stress: 0.6 });
+  else if (p.growth > 15 && e < eLo) out.push({ k: 'ecLow', sev: 1, stress: 0.15 });
+  const T = tempNow(t);
+  if (T > 26) out.push({ k: 'hot', sev: 2, stress: 0.6 });
+  else if (T > 24) out.push({ k: 'warm', sev: 1, stress: 0.05 });
+  if (T < 12) out.push({ k: 'cold', sev: 1, stress: 0.3 });
+  if (p.growth >= 10 && S.lightYesterday < 9 && !lampAuto()) out.push({ k: 'dark', sev: 1, stress: 0.25 });
+  const h = hourOf(t);
+  if (!lampAuto() && S.lampOn && (h >= 23 || h < 5)) out.push({ k: 'nightLamp', sev: 1, stress: 0.1 });
+  if (p.bolted) out.push({ k: 'bolted', sev: 1, stress: 0 });
+  if (!p.bolted && p.growth >= 100) out.push({ k: 'ready', sev: 0, stress: 0 });
+  else if (!p.bolted && p.growth >= 75) out.push({ k: 'canCut', sev: 0, stress: 0 });
+  if (p.growth < 10) out.push({ k: 'germ', sev: 0, stress: 0 });
+  return out;
+}
+
+function midnight(t) {
+  const p = S.plant;
+  if (!p.dead && S.lightToday > 18) {
+    p.bolt += 15;
+    addLog(t, 'Лампа светила больше 18 часов: растению не хватило ночи.');
+  }
+  S.lightYesterday = S.lightToday;
+  S.lightToday = 0;
+  if (!p.dead) S.goodDays = p.health >= 80 ? S.goodDays + 1 : 0;
+  if (Math.random() < 0.25) {
+    S.heatUntil = t + (6 + Math.random() * 6) * HOUR;
+    addLog(t, 'Отопление греет сильнее обычного: у батареи стало жарко.');
+  }
+}
+
+function step(t, dt) {
+  const prev = t - dt * HOUR;
+  if (dayKey(prev) !== dayKey(t)) midnight(t);
+  const p = S.plant;
+  const L = lightNow(t), T = tempNow(t);
+  if (L > 0.15) S.lightToday += dt;
+  const la = leafArea();
+  // испарение и «питьё» растения
+  const drink = p.dead ? 0 : 0.010 * la * (L > 0.15 ? 1.4 : 0.5) * (T > 24 ? 1.3 : 1);
+  S.water = Math.max(0, S.water - (0.0008 + drink) * dt);
+  if (!p.dead) S.nutrients = Math.max(0, S.nutrients - 0.0016 * la * (L > 0.15 ? 1 : 0.4) * dt);
+  // автодолив с поплавковым клапаном
+  if (S.upgrades.autofill && fill() < minFill() + 0.06) {
+    const target = Math.min(minFill() + 0.2, maxFill() - 0.03) * TANK;
+    if (target > S.water) addWater(target - S.water, true);
+  }
+  // pH медленно растёт, пока растение поглощает питание
+  if (!p.dead) S.ph = clamp(S.ph + 0.004 * (0.3 + la) * dt, 3.5, 9);
+  if (p.dead) return;
+
+  const pr = problems(t);
+  const stress = pr.reduce((s, x) => s + x.stress, 0);
+  const has = (k) => pr.some((x) => x.k === k);
+  const sevOf = (k) => (pr.find((x) => x.k === k) || { sev: 0 }).sev;
+
+  // рост
+  const waterF = has('empty') ? 0 : has('low') ? 0.5 : 1;
+  let rate;
+  if (p.growth < 10) {
+    rate = (10 / 72) * tempFactor(T) * waterF;
+  } else {
+    const ecF = sevOf('ecHigh') === 2 || sevOf('ecLow') === 2 ? 0.5 : (has('ecHigh') || has('ecLow') ? 0.85 : 1);
+    const phF = sevOf('phHigh') === 2 || sevOf('phLow') === 2 ? 0.5 : (has('phHigh') || has('phLow') ? 0.85 : 1);
+    const oxyF = has('overfill') ? 0.6 : 1;
+    rate = 0.2564 * Math.min(L, 1.2) * tempFactor(T) * ecF * phF * oxyF * waterF *
+      (0.4 + 0.6 * p.health / 100) * (S.upgrades.aerator ? 1.05 : 1);
+  }
+  const before = p.growth;
+  p.growth = Math.min(100, p.growth + rate * dt);
+  if (p.growth >= 100 && before < 100) { p.fullSince = t; addLog(t, 'Руккола полностью выросла — пора собирать урожай!'); }
+  STAGES.forEach((s) => { if (s.at > 0 && before < s.at && p.growth >= s.at) addLog(t, `Новая стадия: ${s.name.toLowerCase()}.`); });
+
+  // здоровье
+  if (stress > 0.12) p.health = clamp(p.health - stress * dt, 0, 100);
+  else p.health = clamp(p.health + 1.2 * dt, 0, 100);
+  if (p.health <= 0) {
+    p.dead = true;
+    addLog(t, 'Растение погибло. Посей семена заново и следи за подсказками.');
+  }
+  // стрелкование
+  if (T > 25) p.bolt += 1.2 * dt;
+  if (p.fullSince && t - p.fullSince > 6 * DAY) p.bolt += 1.5 * dt;
+  if (!p.bolted && p.bolt >= 100) {
+    p.bolted = true;
+    addLog(t, 'Руккола пошла в стрелку: появился цветонос, листья стали горькими.');
+  }
+}
+
+function advance(gameMs) {
+  let rest = Math.min(gameMs, MAX_CATCHUP);
+  const stepMs = STEP_H * HOUR;
+  while (rest > 0) {
+    const d = Math.min(stepMs, rest);
+    S.gameTime += d;
+    step(S.gameTime, d / HOUR);
+    rest -= d;
+  }
+  if (gameMs > MAX_CATCHUP) S.gameTime += gameMs - MAX_CATCHUP;
+  checkAchievements();
+}
+
+function tick() {
+  const now = Date.now();
+  const real = Math.max(0, now - S.lastReal);
+  S.lastReal = now;
+  if (real > 0) advance(real * S.speed);
+  save();
+  render();
+}
+
+// ===================== ДЕЙСТВИЯ =====================
+function addLog(t, text) {
+  S.log.unshift({ t, text });
+  if (S.log.length > 40) S.log.length = 40;
+}
+function addWater(liters, auto) {
+  const add = Math.min(liters, TANK - S.water);
+  if (add <= 0) return 0;
+  // отстоянная водопроводная вода: pH около 7,2
+  S.ph = (S.ph * S.water + 7.2 * add) / (S.water + add);
+  S.water += add;
+  if (auto) addLog(S.gameTime, `Автодолив добавил ${fmt(add, 2)} л воды.`);
+  return add;
+}
+const ACTIONS = {
+  water() {
+    if (S.plant.dead) return toast('Сначала посей семена заново.');
+    const a = addWater(0.3);
+    if (!a) return toast('Бак полон до краёв.');
+    addLog(S.gameTime, 'Долили 0,3 л воды.');
+    if (fill() > maxFill() + 0.02 && S.plant.growth > 12 && !S.upgrades.aerator) toast('Осторожно: корням нужен воздушный зазор! Не доливай до самой крышки.');
+    else toast('Долили 0,3 л отстоянной воды. Раствор стал слабее.');
+  },
+  feed() {
+    if (S.plant.dead) return toast('Сначала посей семена заново.');
+    S.nutrients += 0.4; S.ph = clamp(S.ph - 0.05, 3.5, 9);
+    addLog(S.gameTime, 'Добавили удобрение для гидропоники.');
+    toast(`Добавили удобрение. Концентрация раствора выросла${S.upgrades.ecmeter ? ' до ' + fmt(ec(), 2) + ' мСм/см' : ''}.`);
+  },
+  phDown() {
+    S.ph = clamp(S.ph - 0.25, 3.5, 9); addLog(S.gameTime, 'Добавили pH− (кислоту).');
+    toast('Добавили немного pH− — раствор стал кислее.');
+  },
+  phUp() {
+    S.ph = clamp(S.ph + 0.25, 3.5, 9); addLog(S.gameTime, 'Добавили pH+ (щёлочь).');
+    toast('Добавили немного pH+ — раствор стал щелочнее.');
+  },
+  lamp() {
+    if (lampAuto()) return toast(S.upgrades.timer ? 'Лампой управляет таймер: с 7:00 до 21:00.' : 'В ускоренном режиме лампа работает по таймеру.');
+    S.lampOn = !S.lampOn;
+    addLog(S.gameTime, S.lampOn ? 'Включили фитолампу.' : 'Выключили фитолампу.');
+    toast(S.lampOn ? 'Фитолампа включена. Рукколе нужно 12–14 часов света в сутки.' : 'Фитолампа выключена. Ночью растениям нужна темнота.');
+  },
+  vent() {
+    S.ventUntil = S.gameTime + HOUR;
+    addLog(S.gameTime, 'Проветрили комнату.');
+    toast('Проветрили комнату: на час стало прохладнее на 4 °С. Сквозняков руккола не боится, но мороз ей не друг.');
+  },
+  cut() {
+    const p = S.plant;
+    if (p.dead || p.growth < 75) return toast('Срезать листья можно, когда растение подрастёт.');
+    const grams = Math.round(120 * (p.growth / 100) * (0.5 + p.health / 200) * (p.bolted ? 0.4 : 1));
+    const reward = Math.max(5, Math.round(grams / 4));
+    S.coins += reward; S.stats.grams += grams; S.stats.harvests += 1;
+    p.cuts += 1;
+    addLog(S.gameTime, `Собрали ${grams} г рукколы.`);
+    if (p.cuts >= 3 || p.bolted) {
+      p.growth = 100; p.dead = false;
+      p.exhausted = true;
+      openModal(`<h2>Урожай: ${grams} г</h2><p>${p.bolted ? 'Руккола уже цвела, поэтому урожай меньше и листья горчат.' : 'Это был третий срез — растение устало.'} Пора посеять новые семена и заменить раствор.</p><p class="price">+${reward} ${I.leaf}</p><button class="btn" data-close>Понятно</button>`);
+    } else {
+      p.growth = 50; p.fullSince = null;
+      openModal(`<h2>Урожай: ${grams} г</h2><p>Ты срезал внешние листья, а сердцевину оставил — руккола отрастёт снова. Осталось срезов: ${3 - p.cuts}.</p><p class="price">+${reward} ${I.leaf}</p><button class="btn" data-close>Отлично!</button>`);
+    }
+    save(); render();
+  },
+  sow() {
+    const t = S.gameTime;
+    S.plant = freshPlant(t);
+    S.water = 2.7; S.nutrients = 2.7 * 0.6; S.ph = 6.3;
+    S.stats.cycles += 1;
+    addLog(t, 'Посеяли новые семена, налили свежий раствор (EC 0,6, pH 6,3).');
+    toast('Посеяли рукколу! Первые 3 дня семена прорастают — свет пока не обязателен.');
+  },
+  solution() {
+    if (S.coins < 5) return toast('Нужно 5 листиков на новое удобрение. Выполни задание!');
+    S.coins -= 5;
+    S.water = ((minFill() + maxFill()) / 2) * TANK;
+    const [lo, hi] = ecRange();
+    S.nutrients = S.water * ((lo + hi) / 2); S.ph = 6.2;
+    addLog(S.gameTime, 'Заменили питательный раствор.');
+    toast('Свежий раствор: pH 6,2, концентрация в норме. Так делают раз в 2–3 недели.');
+  },
+};
+
+// ===================== ТЕКСТЫ ПОДСКАЗОК =====================
+const ADVICE = {
+  dead: ['Растение погибло', 'Не расстраивайся: у настоящих агрономов тоже бывают неудачи. Посей семена заново и следи за подсказками.'],
+  empty: ['Раствор закончился! Корни сохнут', 'Долей воду и добавь удобрение. В методе Кратки уровень снижается сам, но совсем без раствора растение погибнет.'],
+  low: ['Корни не достают до раствора', 'Долей немного воды: раствор должен касаться кончиков корней. Зелёная полоска на шкале «Раствор» — правильный уровень.'],
+  overfill: ['Корням не хватает воздуха!', 'В методе Кратки между крышкой и раствором нужен воздушный зазор: верхние корни дышат, нижние пьют. Не доливай до краёв — подожди, пока растение выпьет лишнее, или поставь аэратор.'],
+  phHigh: ['Раствор слишком щелочной', 'Добавь pH− (в жизни — средство pH Down или щепотку лимонной кислоты). Норма для рукколы — pH 6,0–6,8.'],
+  phLow: ['Раствор слишком кислый', 'Добавь pH+. При неправильном pH корни плохо усваивают питание, даже если удобрения хватает.'],
+  ecHigh: ['Раствор слишком крепкий', 'Долей чистой воды — концентрация снизится. Норма EC 0,8–1,6 мСм/см, для всходов слабее. Удобрения не должно быть больше, чем написано в инструкции.'],
+  ecLow: ['Растению не хватает питания', 'Добавь удобрение для гидропоники. Без питания листья светлеют и желтеют.'],
+  hot: ['Жарко! Руккола может зацвести', 'Выше +25 °С руккола стрелкуется, листья горчат. Проветри комнату, поставь эко-бокс подальше от батареи.'],
+  warm: ['Тепловато для рукколы', 'Лучшая температура +16…+20 °С. Поставь эко-бокс подальше от батареи или купи вентилятор.'],
+  cold: ['Холодно', 'Ниже +12 °С руккола растёт медленно. Закрой окно после проветривания.'],
+  dark: ['Мало света', 'Включай фитолампу на 12–14 часов в сутки. В ноябре в Казани светло меньше 9 часов, а через стекло света ещё меньше.'],
+  nightLamp: ['Ночью лампу лучше выключить', 'Растениям нужна темнота хотя бы 8 часов. Если светить круглые сутки, руккола начнёт цвести. Таймер решит эту задачу.'],
+  bolted: ['Руккола пошла в стрелку', 'Появился цветонос, листья стали горче. Срежь урожай и посей заново. Чтобы этого не было, держи прохладу и не свети больше 14 часов.'],
+  ready: ['Урожай готов!', 'Срежь внешние листья ножницами, а сердцевину оставь — руккола отрастёт ещё. Если долго не срезать, она зацветёт.'],
+  canCut: ['Можно срезать первые листья', 'Молодые листья самые нежные. Можно подождать полного урожая или срезать сейчас.'],
+  germ: ['Семена прорастают', 'Первые 3 дня свет не обязателен: главное — влага и тепло +18…+20 °С. Раствор для всходов делают слабым.'],
+};
+const TIPS = [
+  { h: 'Свет', items: [
+    'Рукколе нужно 12–14 часов света в сутки. Зимой без фитолампы она вытягивается и бледнеет.',
+    'Светодиодную фитолампу вешают на 15–30 см над растениями и поднимают по мере роста.',
+    'Ночью растениям нужна темнота не меньше 8 часов. Круглосуточный свет заставляет рукколу цвести.',
+    'Отражающий экран из фольги возвращает растениям часть света, которая ушла бы в стену.',
+  ] },
+  { h: 'Раствор', items: [
+    'Кислотность (pH) раствора для рукколы — 6,0–6,8. Проверяй её тест-полосками или pH-метром раз в неделю.',
+    'Концентрацию раствора измеряют EC-метром: 0,8–1,6 мСм/см для взрослой рукколы, для всходов — слабее.',
+    'Удобрение разводят строго по инструкции: лишнее «обжигает» корни.',
+    'Воду для раствора лучше отстоять сутки, чтобы ушёл хлор и она стала комнатной температуры.',
+    'Раствор целиком меняют раз в 2–3 недели, а между заменами доливают воду.',
+    'Контейнер должен быть непрозрачным: на свету в растворе быстро разводятся водоросли.',
+  ] },
+  { h: 'Корни и метод Кратки', items: [
+    'В методе Кратки нет насоса: горшочки висят над раствором, а растение само «выпивает» его уровень вниз.',
+    'Воздушный зазор между крышкой и раствором — это «лёгкие» корней. Не доливай раствор до краёв.',
+    'Здоровые корни — белые и упругие. Коричневые и скользкие корни говорят о гнили и нехватке кислорода.',
+    'Тёплый раствор (выше +24 °С) хуже держит кислород. Лучше всего +18…+22 °С.',
+  ] },
+  { h: 'Температура и воздух', items: [
+    'Руккола любит прохладу: +16…+20 °С. В жару она быстро цветёт и горчит.',
+    'Не ставь эко-бокс над батареей отопления: там жарко и сухо.',
+    'Лёгкий ветерок от вентилятора делает стебли крепче и защищает от плесени.',
+  ] },
+  { h: 'Урожай', items: [
+    'Первые листья можно срезать через 20–30 дней после посева.',
+    'Срезай внешние листья ножницами, оставляя сердцевину: руккола отрастёт и даст урожай ещё 1–2 раза.',
+    'Самые нежные — молодые листья длиной 8–12 см.',
+    'Храни рукколу в холодильнике в закрытом контейнере с бумажным полотенцем.',
+  ] },
+  { h: 'Безопасность', items: [
+    'С удобрениями работай в перчатках, вместе со взрослыми. Раствор нельзя пробовать на вкус.',
+    'Следи, чтобы вода не попадала на розетку и провода лампы.',
+    'Перед едой урожай промой водой.',
+  ] },
+];
+
+// ===================== ЗАДАНИЯ =====================
+const REBUSES = [
+  { id: 'r1', a: ['ВОДА'], parts: [{ e: '🐺', w: 'ВОЛК', end: 2 }, { t: 'ДА' }],
+    fact: 'Вода — «дом» для корней в гидропонике. Для раствора лучше брать отстоянную воду комнатной температуры.' },
+  { id: 'r2', a: ['СВЕТ'], parts: [{ e: '🕯️', w: 'СВЕЧА', end: 2 }, { t: 'Т' }],
+    fact: 'Без света нет фотосинтеза. Рукколе нужно 12–14 часов света в сутки.' },
+  { id: 'r3', a: ['ЛАМПА'], parts: [{ e: '🦙', w: 'ЛАМА', end: 1 }, { t: 'ПА' }],
+    fact: 'Светодиодная фитолампа даёт свет нужного растениям спектра и почти не греется.' },
+  { id: 'r4', a: ['КОРЕНЬ'], parts: [{ e: '🐄', w: 'КОРОВА', end: 3 }, { e: '🦌', w: 'ОЛЕНЬ', start: 2 }],
+    fact: 'В гидропонике корни висят в растворе и в воздухе одновременно. Здоровые корни — белые.' },
+  { id: 'r5', a: ['ЛИСТ'], parts: [{ e: '🦊', w: 'ЛИСА', end: 1 }, { t: 'Т' }],
+    fact: 'Листья рукколы рассечённые, с пряным горчичным вкусом. Их и едят.' },
+  { id: 'r6', a: ['НАСОС'], parts: [{ t: 'НА' }, { e: '🌲', w: 'СОСНА', end: 2 }],
+    fact: 'Во многих гидропонных системах насос гоняет раствор по трубам. В методе Кратки насос не нужен.' },
+  { id: 'r7', a: ['РУККОЛА', 'РУКОЛА'], parts: [{ e: '✋', w: 'РУКА', end: 1 }, { t: 'КОЛА' }],
+    fact: 'Руккола (индау посевной) — родственница капусты и редиса. Родом из Средиземноморья.' },
+  { id: 'r8', a: ['РОСТОК'], parts: [{ e: '💧', w: 'РОСА', end: 1 }, { e: '⚡', w: 'ТОК' }],
+    fact: 'Росток рукколы появляется уже на 3–5 день после посева.' },
+  { id: 'r9', a: ['ГИДРОПОНИКА'], parts: [{ t: 'ГИДРО' }, { e: '🐴', w: 'ПОНИ' }, { t: 'КА' }],
+    fact: 'Гидропоника — выращивание растений без почвы, в питательном растворе. Слово придумал американский учёный Уильям Герике.' },
+  { id: 'r10', a: ['КРЫШКА'], parts: [{ e: '🏠', w: 'КРЫША', end: 1 }, { t: 'КА' }],
+    fact: 'В крышке эко-бокса делают отверстия для горшочков-сеточек. Она защищает раствор от света.' },
+  { id: 'r11', a: ['ЗЕЛЕНЬ'], parts: [{ t: 'ЗЕ' }, { e: '🦌', w: 'ОЛЕНЬ', start: 1 }],
+    fact: 'Зелень на гидропонике выращивают круглый год — даже зимой на подоконнике.' },
+];
+const QUIZ = [
+  { q: 'Что такое гидропоника?', o: ['Выращивание растений без почвы, в питательном растворе', 'Выращивание растений в пустыне', 'Полив растений с гидроэлектростанции', 'Выращивание водорослей в аквариуме'], a: 0,
+    e: 'От греческих слов «гидро» — вода и «понос» — работа.' },
+  { q: 'К какому семейству относится руккола?', o: ['Капустные (Крестоцветные)', 'Бобовые', 'Зонтичные', 'Пасленовые'], a: 0, e: 'Её родственники — капуста, редис, горчица и кресс-салат.' },
+  { q: 'Какой pH раствора подходит рукколе?', o: ['3,0–4,0', '6,0–6,8', '8,5–9,5', '11–12'], a: 1, e: 'При правильном pH корни лучше всего усваивают питание.' },
+  { q: 'Сколько часов света в сутки нужно рукколе?', o: ['4–6 часов', '12–14 часов', '24 часа', 'Свет не нужен'], a: 1, e: 'А ещё ей нужна ночь — хотя бы 8 часов темноты.' },
+  { q: 'Почему контейнер для гидропоники делают непрозрачным?', o: ['Так красивее', 'Чтобы в растворе не росли водоросли', 'Чтобы раствор не замёрз', 'Чтобы не было видно корней'], a: 1, e: 'На свету в питательном растворе быстро разводятся водоросли.' },
+  { q: 'Зачем в методе Кратки нужен воздушный зазор под крышкой?', o: ['Чтобы корни дышали', 'Для красоты', 'Чтобы лампа не грела раствор', 'Он не нужен'], a: 0, e: 'Верхние корни дышат воздухом, нижние пьют раствор.' },
+  { q: 'При какой температуре руккола растёт лучше всего?', o: ['+30…+35 °С', '+16…+20 °С', '+5 °С', '+40 °С'], a: 1, e: 'Руккола — холодостойкая культура.' },
+  { q: 'Что случится с рукколой в жару и при очень длинном дне?', o: ['Она станет синей', 'Выпустит цветонос, листья станут горькими', 'Вырастет до метра', 'Ничего'], a: 1, e: 'Это называется стрелкованием.' },
+  { q: 'Каким прибором измеряют концентрацию питательного раствора?', o: ['Барометром', 'EC-метром (кондуктометром)', 'Спидометром', 'Секундомером'], a: 1, e: 'EC-метр измеряет электропроводность: чем больше солей, тем она выше.' },
+  { q: 'Какого витамина особенно много в рукколе?', o: ['Витамина K', 'Витамина D', 'Витамина B12', 'В рукколе нет витаминов'], a: 0, e: 'В 100 г рукколы около 109 мкг витамина K — почти суточная норма взрослого.' },
+  { q: 'Через сколько дней после посева можно собирать рукколу?', o: ['Через 2–3 дня', 'Через 20–30 дней', 'Через полгода', 'Через год'], a: 1, e: 'Руккола — одна из самых скороспелых культур.' },
+  { q: 'Что используют вместо почвы для опоры растения в гидропонике?', o: ['Пластилин', 'Кокосовое волокно, минвату, перлит', 'Сахар', 'Ничего, растение лежит на воде'], a: 1, e: 'Такие материалы называют субстратами.' },
+  { q: 'Кто придумал слово «гидропоника»?', o: ['Исаак Ньютон', 'Уильям Герике', 'Д. И. Менделеев', 'Чарлз Дарвин'], a: 1, e: 'В 1930-х годах он вырастил в растворе томаты высотой около 7,5 м.' },
+  { q: 'Что делать, если pH раствора стал 7,5?', o: ['Добавить соль', 'Добавить средство pH− (кислоту)', 'Выключить лампу', 'Ничего не делать'], a: 1, e: 'pH− понижает кислотность до нормы 6,0–6,8.' },
+  { q: 'Откуда родом руккола?', o: ['Из Антарктиды', 'Из Средиземноморья', 'Из Австралии', 'С Северного полюса'], a: 1, e: 'Её выращивали ещё в Древнем Риме.' },
+  { q: 'Можно ли срезать рукколу несколько раз?', o: ['Нет, после срезки она погибает', 'Да, если оставить сердцевину, листья отрастут', 'Только зимой', 'Только ночью'], a: 1, e: 'Обычно её срезают 2–3 раза.' },
+  { q: 'Чем плох слишком крепкий раствор?', o: ['Он «обжигает» корни', 'Он слишком сладкий', 'Он светится', 'Ничем'], a: 0, e: 'Удобрение разводят строго по инструкции.' },
+  { q: 'Какую воду лучше брать для раствора?', o: ['Горячую из чайника', 'Отстоянную, комнатной температуры', 'Морскую', 'Газированную'], a: 1, e: 'За сутки из воды уходит хлор, и она нагревается до комнатной температуры.' },
+];
+const RIDDLES = [
+  { id: 'g1', q: 'Солнца нет, а свет горит,\nЗелень бодро в рост бежит.\nНад растеньями висит —\nКто им солнце заменит?', a: ['ФИТОЛАМПА', 'ЛАМПА'], hint: 'Это светодиодная …лампа.' },
+  { id: 'g2', q: 'Сам в растворе я сижу,\nВоду для листвы ищу.\nСолнца в жизни не видал,\nНо растенье напитал.', a: ['КОРЕНЬ', 'КОРНИ', 'КОРЕШОК'], hint: 'Подземная (а здесь — подводная) часть растения.' },
+  { id: 'g3', q: 'Без колёс и без мотора\nПузырьки пускаю споро.\nЧтоб корням дышать легко,\nВоздух шлю я глубоко.', a: ['АЭРАТОР', 'КОМПРЕССОР'], hint: 'Слово похоже на «аэро» — воздух.' },
+  { id: 'g4', q: 'Лист резной, на вкус с горчинкой,\nС сыром дружит и с начинкой.\nИз Италии привет —\nВ пицце лучше листьев нет.', a: ['РУККОЛА', 'РУКОЛА', 'ИНДАУ'], hint: 'Главная героиня нашей игры.' },
+  { id: 'g5', q: 'В горшочек зёрнышко кладу,\nА через три денька найду\nНа нём зелёный хохолок.\nЧто посадил я, кто помог?', a: ['СЕМЯ', 'СЕМЕЧКО', 'СЕМЕНА', 'СЕМЕЧКА', 'ЗЕРНО'], hint: 'С него начинается каждое растение.' },
+];
+const ACHIEVEMENTS = [
+  { id: 'a1', name: 'Первые всходы', d: 'Дорасти до семядолей', r: 10, ok: () => S.plant.growth >= 10 || S.stats.harvests > 0 },
+  { id: 'a2', name: 'Настоящий лист', d: 'Дорасти до первого настоящего листа', r: 10, ok: () => S.plant.growth >= 20 || S.stats.harvests > 0 },
+  { id: 'a3', name: 'Первый урожай', d: 'Срезать рукколу', r: 20, ok: () => S.stats.harvests >= 1 },
+  { id: 'a4', name: 'Полкило зелени', d: 'Собрать 500 г рукколы за всё время', r: 40, ok: () => S.stats.grams >= 500 },
+  { id: 'a5', name: 'Неделя заботы', d: '7 игровых дней подряд здоровье не ниже 80 %', r: 25, ok: () => S.goodDays >= 7 },
+  { id: 'a6', name: 'Мастер ребусов', d: 'Отгадать все ребусы', r: 30, ok: () => REBUSES.every((r) => S.solved[r.id]) },
+  { id: 'a7', name: 'Эрудит', d: 'Правильно ответить на все вопросы викторины', r: 30, ok: () => QUIZ.every((q, i) => S.solved['q' + i]) },
+  { id: 'a8', name: 'Полный огород', d: 'Купить все улучшения', r: 50, ok: () => SHOP.every((u) => S.upgrades[u.id]) },
+];
+function checkAchievements() {
+  ACHIEVEMENTS.forEach((a) => {
+    if (!S.ach[a.id] && a.ok()) {
+      S.ach[a.id] = true; S.coins += a.r;
+      addLog(S.gameTime, `Достижение «${a.name}»: +${a.r} листиков.`);
+      toast(`Достижение «${a.name}»! +${a.r} листиков`);
+    }
+  });
+}
+
+// ===================== УЛУЧШЕНИЯ =====================
+const SHOP = [
+  { id: 'timer', name: 'Таймер для лампы', price: 30, d: 'Розеточный таймер сам включает фитолампу в 7:00 и выключает в 21:00 — ровно 14 часов света и ночь без света.',
+    ico: '<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" fill="#fff" stroke="#24572a" stroke-width="2.5"/><path d="M16 10v7l5 3" stroke="#6a3f9c" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>' },
+  { id: 'phmeter', name: 'pH-метр', price: 25, d: 'Показывает кислотность раствора с точностью до десятых. Без него видно только примерное значение по тест-полоске.',
+    ico: '<svg viewBox="0 0 32 32"><rect x="11" y="3" width="10" height="20" rx="3" fill="#2c82b0"/><rect x="14" y="23" width="4" height="7" rx="1" fill="#56685b"/><text x="16" y="15" font-size="7" font-weight="800" text-anchor="middle" fill="#fff" font-family="sans-serif">pH</text></svg>' },
+  { id: 'ecmeter', name: 'EC-метр', price: 25, d: 'Измеряет концентрацию удобрений в растворе (мСм/см). Без него видно только «мало», «норма» или «много».',
+    ico: '<svg viewBox="0 0 32 32"><rect x="11" y="3" width="10" height="20" rx="3" fill="#3e8e3a"/><rect x="14" y="23" width="4" height="7" rx="1" fill="#56685b"/><text x="16" y="15" font-size="7" font-weight="800" text-anchor="middle" fill="#fff" font-family="sans-serif">EC</text></svg>' },
+  { id: 'shelf', name: 'Полка подальше от батареи', price: 15, d: 'Эко-бокс переезжает с горячего подоконника над батареей: в комнате становится на 2 °С прохладнее для рукколы.',
+    ico: '<svg viewBox="0 0 32 32"><rect x="4" y="14" width="24" height="4" rx="1" fill="#8d6e4a"/><path d="M8 18v8M24 18v8" stroke="#8d6e4a" stroke-width="2.5"/><rect x="10" y="6" width="12" height="8" rx="2" fill="#3e8e3a"/></svg>' },
+  { id: 'reflector', name: 'Отражающий экран', price: 20, d: 'Фольга вокруг эко-бокса возвращает растениям свет, который ушёл бы в стену: +10 % света.',
+    ico: '<svg viewBox="0 0 32 32"><path d="M6 6l6 2v18l-6-2z" fill="#b8c2c9"/><path d="M26 6l-6 2v18l6-2z" fill="#d9e1e6"/><path d="M16 4v8" stroke="#e9a91f" stroke-width="2.5" stroke-linecap="round"/></svg>' },
+  { id: 'fan', name: 'Вентилятор на прищепке', price: 35, d: 'Лёгкий ветерок охлаждает листья на 1 °С, укрепляет стебли и не даёт завестись плесени.',
+    ico: '<svg viewBox="0 0 32 32"><circle cx="16" cy="14" r="10" fill="none" stroke="#56685b" stroke-width="2"/><path d="M16 14c0-6 5-7 6-4-3 1-5 3-6 4zm0 0c5 3 3 8 0 7 0-3-1-5 0-7zm0 0c-5 3-8-1-6-3 2 2 4 3 6 3z" fill="#2c82b0"/><path d="M16 24v5" stroke="#56685b" stroke-width="2.5"/></svg>' },
+  { id: 'aerator', name: 'Аэратор', price: 45, d: 'Компрессор с распылителем насыщает раствор кислородом. Корни дышат, даже если раствора много, рост +5 %.',
+    ico: '<svg viewBox="0 0 32 32"><rect x="3" y="18" width="12" height="9" rx="2" fill="#56685b"/><path d="M15 22h6v-8" stroke="#56685b" stroke-width="2" fill="none"/><circle cx="21" cy="10" r="2" fill="#2c82b0"/><circle cx="25" cy="6" r="1.6" fill="#2c82b0"/><circle cx="20" cy="4" r="1.3" fill="#2c82b0"/></svg>' },
+  { id: 'autofill', name: 'Поплавковый автодолив', price: 50, d: 'Бутыль с поплавковым клапаном сама доливает воду, когда уровень опускается слишком низко, и оставляет воздушный зазор.',
+    ico: '<svg viewBox="0 0 32 32"><path d="M10 3h8v4l3 4v16a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V11l3-4z" fill="#dcecf5" stroke="#2c82b0" stroke-width="2"/><rect x="9" y="17" width="10" height="10" fill="#2c82b0" opacity=".6"/></svg>' },
+  { id: 'led', name: 'LED-лампа полного спектра', price: 60, d: 'Мощная светодиодная лампа с синим и красным светом, который лучше всего поглощают листья: +20 % света.',
+    ico: '<svg viewBox="0 0 32 32"><rect x="3" y="7" width="26" height="6" rx="2" fill="#56685b"/><circle cx="8" cy="10" r="1.6" fill="#e94b8a"/><circle cx="13" cy="10" r="1.6" fill="#5b7cf0"/><circle cx="18" cy="10" r="1.6" fill="#e94b8a"/><circle cx="23" cy="10" r="1.6" fill="#5b7cf0"/><path d="M8 16l-2 8M16 16v9M24 16l2 8" stroke="#c86fe0" stroke-width="2" stroke-linecap="round"/></svg>' },
+];
+function buy(id) {
+  const u = SHOP.find((x) => x.id === id);
+  if (!u || S.upgrades[id]) return;
+  if (S.coins < u.price) return toast(`Не хватает ${u.price - S.coins} листиков. Загляни в «Задания»!`);
+  S.coins -= u.price; S.upgrades[id] = true;
+  addLog(S.gameTime, `Куплено улучшение: ${u.name.toLowerCase()}.`);
+  toast(`Готово: ${u.name.toLowerCase()} теперь в твоём огороде!`);
+  checkAchievements(); save(); render();
+}
+
+// ===================== СЦЕНА (canvas) =====================
+const cv = document.getElementById('scene');
+const ctx = cv.getContext('2d');
+const VW = 400, VH = 290;
+let anim = 0;
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function mix(a, b, k) {
+  const pa = a.match(/\w\w/g).map((x) => parseInt(x, 16)), pb = b.match(/\w\w/g).map((x) => parseInt(x, 16));
+  return '#' + pa.map((v, i) => Math.round(v + (pb[i] - v) * k).toString(16).padStart(2, '0')).join('');
+}
+function skyColors(h) {
+  if (h < 6 || h >= 19) return ['#142039', '#2a3a63'];
+  if (h < 8) { const k = (h - 6) / 2; return [mix('142039', '9fcbe8', k), mix('2a3a63', 'f4c79b', k)]; }
+  if (h < 16) return ['#8fc4e6', '#dceff8'];
+  const k = (h - 16) / 3; return [mix('8fc4e6', '142039', k), mix('f4c79b', '2a3a63', k)];
+}
+function leafPath(len, wid) {
+  const l = len, w = wid;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(l * 0.15, -w * 0.15, l * 0.25, -w * 0.25, l * 0.3, -w * 0.15);
+  ctx.bezierCurveTo(l * 0.33, -w * 0.6, l * 0.42, -w * 0.7, l * 0.46, -w * 0.25);
+  ctx.bezierCurveTo(l * 0.52, -w * 0.85, l * 0.64, -w, l * 0.67, -w * 0.35);
+  ctx.bezierCurveTo(l * 0.75, -w * 1.05, l * 0.97, -w * 0.9, l, 0);
+  ctx.bezierCurveTo(l * 0.97, w * 0.9, l * 0.75, w * 1.05, l * 0.67, w * 0.35);
+  ctx.bezierCurveTo(l * 0.64, w, l * 0.52, w * 0.85, l * 0.46, w * 0.25);
+  ctx.bezierCurveTo(l * 0.42, w * 0.7, l * 0.33, w * 0.6, l * 0.3, w * 0.15);
+  ctx.bezierCurveTo(l * 0.25, w * 0.25, l * 0.15, w * 0.15, 0, 0);
+  ctx.closePath();
+}
+function drawPlant(x, y, seed) {
+  const p = S.plant, g = p.growth;
+  const health = p.dead ? 0 : p.health / 100;
+  const base = p.dead ? '#8a6d3b' : mix('c8b14a', '4f9a3c', clamp(health * 1.2, 0, 1));
+  const pale = S.lightYesterday < 9 && !lampAuto() && g > 10 ? 0.3 : 0;
+  const col = pale ? mix(base.slice(1), 'b9d98a', pale) : base;
+  const droop = p.dead ? 1 : clamp((60 - p.health) / 60, 0, 0.7) + (problems(S.gameTime).some((q) => q.k === 'empty' || q.k === 'low') ? 0.3 : 0);
+  if (g < 4) {
+    // семена на субстрате
+    ctx.fillStyle = '#6b4a2b';
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(x - 6 + i * 6, y - 1, 1.6, 1.1, 0, 0, Math.PI * 2); ctx.fill(); }
+    return;
+  }
+  if (g < 10) {
+    ctx.strokeStyle = '#d9cfb0'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 2, y - 4, x + 1, y - 2 - (g - 4)); ctx.stroke();
+    ctx.fillStyle = '#d9cfb0'; ctx.beginPath(); ctx.ellipse(x + 1, y - 3 - (g - 4), 1.8, 1.4, 0, 0, Math.PI * 2); ctx.fill();
+    return;
+  }
+  // семядоли
+  const cot = clamp((g - 10) / 10, 0, 1);
+  const stem = 4 + cot * 4;
+  ctx.strokeStyle = mix(col.slice(1), '24572a', 0.3); ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - stem); ctx.stroke();
+  [-1, 1].forEach((s) => {
+    ctx.save(); ctx.translate(x + s * (4 + cot * 3), y - stem - 1 + droop * 3);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, 4 + cot * 3, 2.6 + cot * 1.6, s * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  });
+  if (g < 20) return;
+  // настоящие листья
+  const size = clamp((g - 20) / 80, 0, 1);
+  const n = Math.round(2 + size * 9);
+  const maxLen = 18 + size * 68;
+  for (let i = 0; i < n; i++) {
+    const k = i / Math.max(1, n - 1);
+    const side = i % 2 ? 1 : -1;
+    const spread = side * (0.15 + 1.0 * (1 - k)) * (0.6 + ((seed * 7 + i * 13) % 10) / 25);
+    const ang = -Math.PI / 2 + spread + side * droop * 0.9;
+    const len = maxLen * (0.55 + 0.45 * ((i * 37 + seed * 11) % 10) / 10) * (i < 2 ? 0.75 : 1);
+    ctx.save();
+    ctx.translate(x, y - stem + 2);
+    ctx.rotate(ang);
+    ctx.fillStyle = i % 3 === 0 ? mix(col.slice(1), '2f7d32', 0.25) : col;
+    leafPath(len, 3 + len * 0.13);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(30,70,30,.45)'; ctx.lineWidth = 0.7;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len * 0.95, 0); ctx.stroke();
+    ctx.restore();
+  }
+  if (p.bolted) {
+    // цветонос с цветками (бледно-жёлтые лепестки с фиолетовыми жилками)
+    ctx.strokeStyle = '#4f7f3a'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x, y - stem); ctx.quadraticCurveTo(x + 6, y - 60, x + 2, y - 100); ctx.stroke();
+    for (let j = 0; j < 4; j++) {
+      const fy = y - 70 - j * 9, fx = x + 4 - j;
+      ctx.fillStyle = '#f2e8b8'; ctx.beginPath(); ctx.arc(fx, fy, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#6a3f9c'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(fx - 2, fy); ctx.lineTo(fx + 2, fy); ctx.stroke();
+    }
+  }
+}
+function drawScene() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  const cssW = cv.clientWidth || 400;
+  const W = Math.round(cssW * dpr), Hh = Math.round(cssW * (VH / VW) * dpr);
+  if (cv.width !== W || cv.height !== Hh) { cv.width = W; cv.height = Hh; }
+  ctx.setTransform(W / VW, 0, 0, W / VW, 0, 0);
+  const t = S.gameTime, h = hourOf(t), night = h < 7 || h >= 18.5;
+  const lampOn = lampIsOn(t);
+  const WX = 46, WY = 8, WW = 308, WH = 180; // окно
+  const sillY = WY + WH;
+  // стена
+  ctx.fillStyle = '#dfe6da'; ctx.fillRect(0, 0, VW, VH);
+  ctx.fillStyle = '#d6dfd1';
+  for (let i = 0; i < VW; i += 24) ctx.fillRect(i, 0, 12, VH);
+  // окно
+  const [s1, s2] = skyColors(h);
+  const gr = ctx.createLinearGradient(0, WY, 0, sillY); gr.addColorStop(0, s1); gr.addColorStop(1, s2);
+  ctx.fillStyle = gr; ctx.fillRect(WX, WY, WW, WH);
+  if (h < 6 || h >= 19) {
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 28; i++) { const sx = WX + 6 + (i * 97) % (WW - 12), sy = WY + 8 + (i * 53) % 90; ctx.globalAlpha = 0.4 + (i % 3) * 0.2; ctx.fillRect(sx, sy, 1.4, 1.4); }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#f3f0d8'; ctx.beginPath(); ctx.arc(312, 38, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = s1; ctx.beginPath(); ctx.arc(317, 34, 10, 0, Math.PI * 2); ctx.fill();
+  } else if (h >= 8 && h < 16.5) {
+    const k = (h - 8) / 8.5; const sx = WX + 20 + k * (WW - 40), sy = 76 - Math.sin(k * Math.PI) * 50;
+    ctx.fillStyle = 'rgba(255,214,120,.95)'; ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI * 2); ctx.fill();
+  }
+  // крыши со снегом
+  const roofs = [[WX, 148, 70, 40], [WX + 64, 158, 60, 30], [WX + 118, 138, 84, 50], [WX + 196, 156, 54, 32], [WX + 244, 144, 64, 44]];
+  ctx.fillStyle = night ? '#1f2b45' : '#7d8fa3';
+  roofs.forEach(([x, y, w, hh]) => ctx.fillRect(x, y, w, Math.min(hh, sillY - y)));
+  ctx.fillStyle = night ? '#9fb0cc' : '#f4f8fb';
+  roofs.forEach(([x, y, w]) => ctx.fillRect(x, y - 3, w, 4));
+  if (night) {
+    ctx.fillStyle = '#f2d36b';
+    [[62, 162], [88, 170], [180, 152], [206, 166], [300, 158], [322, 172]].forEach(([x, y]) => ctx.fillRect(x, y, 5, 6));
+  }
+  // рама
+  ctx.strokeStyle = '#fbfcf8'; ctx.lineWidth = 8; ctx.strokeRect(WX, WY, WW, WH);
+  ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(200, WY); ctx.lineTo(200, sillY); ctx.stroke();
+  // термометр на раме
+  const T = tempNow(t);
+  ctx.fillStyle = '#fff'; ctx.fillRect(334, 52, 10, 52);
+  ctx.fillStyle = T > 24 ? '#b8392a' : '#2c82b0';
+  const tl = clamp((T - 10) / 20, 0, 1) * 40; ctx.fillRect(337, 96 - tl, 4, tl + 4);
+  ctx.beginPath(); ctx.arc(339, 100, 4, 0, Math.PI * 2); ctx.fill();
+  // подоконник и батарея
+  ctx.fillStyle = '#f4f2ea'; ctx.fillRect(22, sillY, 356, 12);
+  ctx.fillStyle = '#e1ddd0'; ctx.fillRect(22, sillY + 12, 356, 4);
+  if (!S.upgrades.shelf) {
+    ctx.fillStyle = t < S.heatUntil ? '#efe1d6' : '#eceeea';
+    for (let i = 0; i < 9; i++) ctx.fillRect(110 + i * 20, 220, 16, 52);
+    ctx.fillStyle = '#c9ccc4'; ctx.fillRect(106, 268, 188, 5);
+    if (t < S.heatUntil) {
+      ctx.strokeStyle = 'rgba(200,90,60,.35)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) { const wx = 140 + i * 40, o = reduceMotion ? 0 : Math.sin(anim / 15 + i) * 3; ctx.beginPath(); ctx.moveTo(wx, 216); ctx.quadraticCurveTo(wx + 6 + o, 210, wx, 204); ctx.stroke(); }
+    }
+  } else {
+    ctx.fillStyle = '#a07c55'; ctx.fillRect(70, 240, 260, 7);
+    ctx.fillStyle = '#8d6e4a'; ctx.fillRect(90, 247, 6, 28); ctx.fillRect(304, 247, 6, 28);
+    ctx.fillStyle = '#56685b'; ctx.font = '600 9px Manrope, sans-serif'; ctx.fillText('батарея на другой стене', 146, 266);
+  }
+  // таймер в розетке
+  if (S.upgrades.timer) {
+    ctx.fillStyle = '#fbfcf8'; ctx.fillRect(344, 222, 26, 34);
+    ctx.strokeStyle = '#56685b'; ctx.lineWidth = 1; ctx.strokeRect(344, 222, 26, 34);
+    ctx.beginPath(); ctx.arc(357, 238, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(357, 238); ctx.lineTo(357 + 6 * Math.cos(h / 12 * Math.PI - Math.PI / 2), 238 + 6 * Math.sin(h / 12 * Math.PI - Math.PI / 2)); ctx.stroke();
+  }
+  // ночное затемнение комнаты
+  if (night) { ctx.fillStyle = 'rgba(10,20,40,.35)'; ctx.fillRect(0, 0, VW, VH); }
+  // отражающий экран
+  if (S.upgrades.reflector) {
+    const rg = ctx.createLinearGradient(96, 0, 304, 0);
+    rg.addColorStop(0, '#c4cdd3'); rg.addColorStop(0.5, '#eef2f4'); rg.addColorStop(1, '#c4cdd3');
+    ctx.fillStyle = rg; ctx.globalAlpha = 0.85; ctx.fillRect(96, 30, 208, 86); ctx.globalAlpha = 1;
+  }
+  // свет лампы
+  const lampY = 20;
+  if (lampOn) {
+    const lg = ctx.createLinearGradient(0, lampY, 0, sillY);
+    const c = S.upgrades.led ? '220,140,240' : '255,220,130';
+    lg.addColorStop(0, `rgba(${c},.55)`); lg.addColorStop(1, `rgba(${c},0)`);
+    ctx.fillStyle = lg; ctx.beginPath(); ctx.moveTo(118, lampY); ctx.lineTo(282, lampY); ctx.lineTo(336, sillY); ctx.lineTo(64, sillY); ctx.closePath(); ctx.fill();
+  }
+  // эко-бокс (разрез)
+  const bx = 96, bw = 208, lidY = 116, by = sillY + 4;
+  const f = fill();
+  const wy = by - 4 - f * (by - 4 - lidY - 6);
+  ctx.fillStyle = '#e8eef0'; ctx.fillRect(bx, lidY, bw, by - lidY);
+  ctx.fillStyle = mix('9cc8e0', '8fbf9a', clamp(ec() / 2.5, 0, 1)); ctx.fillRect(bx, wy, bw, by - wy);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(bx, wy, bw, 2);
+  // корни
+  const cups = [140, 200, 260];
+  const rd = rootDev();
+  const rootCol = problems(t).some((q) => q.k === 'overfill') ? '#c9a86a' : '#f3ecd8';
+  cups.forEach((cx, ci) => {
+    if (S.plant.growth < 4) return;
+    const len = 4 + rd * (by - lidY - 24);
+    ctx.strokeStyle = rootCol; ctx.lineWidth = 1.3;
+    for (let i = 0; i < 8; i++) {
+      const dx = (i - 3.5) * 2.4;
+      ctx.beginPath(); ctx.moveTo(cx + dx * 0.4, lidY + 18);
+      ctx.bezierCurveTo(cx + dx, lidY + 18 + len * 0.4, cx + dx * 1.8, lidY + 18 + len * 0.7, cx + dx * 1.5 + ((i + ci) % 2 ? 2 : -2), lidY + 18 + len * (0.75 + (i % 3) * 0.1));
+      ctx.stroke();
+    }
+  });
+  // пузырьки аэратора
+  if (S.upgrades.aerator) {
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    for (let i = 0; i < 12; i++) {
+      const ph = ((anim * 0.6 + i * 17) % 60) / 60;
+      const yy = by - 6 - ph * (by - 6 - wy);
+      if (yy > wy) { ctx.beginPath(); ctx.arc(bx + 18 + (i * 31) % 172, yy, 1.4 + (i % 3) * 0.5, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.fillStyle = '#56685b'; ctx.fillRect(60, sillY - 14, 24, 14);
+    ctx.strokeStyle = '#56685b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(84, sillY - 8); ctx.lineTo(102, sillY - 8); ctx.lineTo(102, by - 6); ctx.stroke();
+  }
+  // стенки контейнера (непрозрачные)
+  ctx.strokeStyle = '#3b4a52'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(bx, lidY); ctx.lineTo(bx, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, lidY); ctx.stroke();
+  // крышка
+  ctx.fillStyle = '#56707d'; ctx.fillRect(bx - 6, lidY - 6, bw + 12, 8);
+  // горшочки
+  cups.forEach((cx) => {
+    ctx.fillStyle = '#7c5b45';
+    ctx.beginPath(); ctx.moveTo(cx - 16, lidY - 6); ctx.lineTo(cx + 16, lidY - 6); ctx.lineTo(cx + 10, lidY + 18); ctx.lineTo(cx - 10, lidY + 18); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(40,25,15,.6)'; ctx.lineWidth = 0.8;
+    for (let k = 0; k < 3; k++) { const yy = lidY + k * 6; ctx.beginPath(); ctx.moveTo(cx - 13 + k * 1.5, yy); ctx.lineTo(cx + 13 - k * 1.5, yy); ctx.stroke(); }
+  });
+  // растения
+  cups.forEach((cx, i) => drawPlant(cx, lidY - 6, i + 1));
+  // бутыль автодолива
+  if (S.upgrades.autofill) {
+    ctx.fillStyle = 'rgba(220,236,245,.9)'; ctx.strokeStyle = '#2c82b0'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(312, 112); ctx.lineTo(330, 112); ctx.lineTo(330, sillY - 12); ctx.lineTo(325, sillY - 2); ctx.lineTo(317, sillY - 2); ctx.lineTo(312, sillY - 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(44,130,176,.55)'; ctx.fillRect(313, 136, 16, sillY - 150);
+    ctx.beginPath(); ctx.moveTo(321, sillY - 2); ctx.lineTo(321, sillY + 2); ctx.lineTo(300, sillY + 2); ctx.stroke();
+  }
+  // приборы
+  if (S.upgrades.phmeter) { ctx.fillStyle = '#2c82b0'; ctx.fillRect(34, sillY - 22, 7, 22); }
+  if (S.upgrades.ecmeter) { ctx.fillStyle = '#3e8e3a'; ctx.fillRect(44, sillY - 18, 7, 18); }
+  // вентилятор
+  if (S.upgrades.fan) {
+    const fx = 356, fy = 150;
+    ctx.strokeStyle = '#56685b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(fx, fy, 14, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(fx, fy + 14); ctx.lineTo(fx, sillY); ctx.stroke();
+    ctx.save(); ctx.translate(fx, fy); ctx.rotate(reduceMotion ? 0 : anim / 3);
+    ctx.fillStyle = '#2c82b0';
+    for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI * 2 / 3); ctx.beginPath(); ctx.ellipse(6, 0, 7, 3, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  // лампа
+  ctx.strokeStyle = '#56685b'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(140, WY); ctx.lineTo(140, lampY); ctx.moveTo(260, WY); ctx.lineTo(260, lampY); ctx.stroke();
+  ctx.fillStyle = '#3f4e48'; ctx.fillRect(114, lampY - 4, 172, 9);
+  ctx.fillStyle = lampOn ? (S.upgrades.led ? '#e7a9f5' : '#ffe39a') : '#9aa59e';
+  ctx.fillRect(118, lampY + 4, 164, 3);
+  // уровень раствора
+  ctx.fillStyle = '#18301e'; ctx.font = '700 10px Manrope, sans-serif';
+  ctx.fillText(`${fmt(S.water, 1)} л`, bx + bw - 34, Math.min(by - 7, wy + 13));
+}
+
+// ===================== ИНТЕРФЕЙС =====================
+const $ = (id) => document.getElementById(id);
+function setHTML(el, html) { if (el._h !== html) { el.innerHTML = html; el._h = html; } }
+let view = 'garden', taskTab = 'rebus', quizIdx = null, quizPicked = null, toastTimer = 0;
+function toast(msg) {
+  const el = $('toast'); el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3600);
+}
+function openModal(html) { $('modal').innerHTML = html; $('modalBg').hidden = false; const b = $('modal').querySelector('button'); if (b) b.focus(); }
+function closeModal() { $('modalBg').hidden = true; }
+$('modalBg').addEventListener('click', (e) => {
+  if (e.target.id === 'modalBg' || e.target.closest('[data-close]')) { closeModal(); render(); }
+  const m = e.target.closest('[data-mode]');
+  if (m) { setSpeed(+m.dataset.mode); S.seenIntro = true; closeModal(); save(); render(); }
+});
+
+function setSpeed(v) {
+  tick();
+  S.speed = v; S.lastReal = Date.now();
+  addLog(S.gameTime, `Скорость времени: ${SPEEDS.find((s) => s.v === v).name.toLowerCase()}.`);
+}
+
+function stageName() {
+  const p = S.plant;
+  if (p.dead) return 'Растение погибло';
+  if (p.exhausted) return 'Урожай собран полностью';
+  if (p.bolted) return 'Руккола цветёт (стрелкуется)';
+  let s = STAGES[0].name; STAGES.forEach((x) => { if (p.growth >= x.at) s = x.name; });
+  return s;
+}
+function plantFacts() {
+  const p = S.plant, g = p.growth;
+  const days = Math.floor((S.gameTime - p.planted) / DAY) + 1;
+  const height = g < 10 ? 0 : 1 + 17 * Math.pow(clamp((g - 10) / 90, 0, 1), 0.9);
+  const leaves = g < 20 ? 0 : Math.round(1 + clamp((g - 20) / 80, 0, 1) * 8);
+  return `День ${days} · ${fmt(height)} см · листьев: ${leaves}`;
+}
+function statusChip(level, text) { return `<span class="chip ${level === 2 ? 'bad' : level === 1 ? 'warn' : ''}">${text}</span>`; }
+
+function renderGarden() {
+  const t = S.gameTime, p = S.plant;
+  const d = new Date(t);
+  const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
+  const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  $('clock').textContent = `${dateStr}, ${hh}:${mm}`;
+  const sp = SPEEDS.find((s) => s.v === S.speed);
+  $('speedPill').hidden = S.speed === 1;
+  $('speedPill').textContent = sp ? sp.name : '';
+  $('stage').textContent = stageName();
+  $('facts').textContent = p.dead ? '' : plantFacts();
+  $('hbar').style.width = (p.dead ? 0 : p.health) + '%';
+  $('hval').textContent = Math.round(p.dead ? 0 : p.health) + '%';
+  $('gbar').style.width = p.growth + '%';
+  $('gval').textContent = Math.floor(p.growth) + '%';
+
+  // подсказка
+  const pr = problems(t).sort((a, b) => b.sev - a.sev);
+  const top = pr[0];
+  const al = $('alert');
+  if (p.exhausted) {
+    al.className = 'alert'; al.innerHTML = '<b>Растение отдало весь урожай</b><p>Посей новые семена — и всё начнётся сначала. Свежий раствор нальётся автоматически.</p>';
+  } else if (top) {
+    const [h, txt] = ADVICE[top.k];
+    al.className = 'alert sev' + top.sev;
+    al.innerHTML = `<b>${h}</b><p>${txt}</p>`;
+  } else {
+    const all = TIPS.flatMap((g) => g.items);
+    const tip = all[Math.floor(t / (3 * HOUR)) % all.length];
+    al.className = 'alert';
+    al.innerHTML = `<b>Всё в порядке</b><p>${tip}</p>`;
+  }
+
+  // приборы
+  const f = fill(), lo = minFill(), hi = maxFill();
+  const wl = S.water < 0.08 ? 2 : f < lo ? 2 : f > hi + 0.02 && p.growth > 12 && !S.upgrades.aerator ? 2 : 0;
+  const ph = S.ph, phL = ph < 5.0 || ph > 7.5 ? 2 : ph < 5.6 || ph > 7.0 ? 1 : 0;
+  const e = ec(), [eLo, eHi] = ecRange();
+  const ecL = e > eHi + 0.9 ? 2 : e > eHi ? 1 : p.growth > 15 && e < eLo - 0.3 ? 2 : p.growth > 15 && e < eLo ? 1 : 0;
+  const T = tempNow(t), TL = T > 26 ? 2 : T > 24 || T < 14 ? 1 : 0;
+  const lightT = S.lightToday, lightL = !lampAuto() && S.lightYesterday < 9 && p.growth >= 10 ? 1 : 0;
+  const L = lightNow(t);
+  const phVal = S.upgrades.phmeter ? fmt(ph, 1) : '≈ ' + fmt(Math.round(ph * 2) / 2, 1);
+  const ecVal = S.upgrades.ecmeter ? fmt(e, 2) : (e > eHi ? 'много' : e < eLo ? 'мало' : 'норма');
+  setHTML($('gauges'), `
+    <div class="gauge"><span class="lbl">Раствор</span><span class="val">${fmt(S.water, 2)} л</span>
+      <div class="tank"><div class="zone" style="left:${lo * 100}%;width:${(hi - lo) * 100}%"></div><div class="lvl" style="width:${f * 100}%"></div></div>
+      ${statusChip(wl, wl ? (f < lo ? 'мало' : 'нет зазора') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">pH</span><span class="val">${phVal}</span><span class="sub">${S.upgrades.phmeter ? 'pH-метр' : 'тест-полоска'} · норма 6,0–6,8</span>${statusChip(phL, phL ? (ph < 6 ? 'кислый' : 'щелочной') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">EC, мСм/см</span><span class="val">${ecVal}</span><span class="sub">норма ${fmt(eLo, 1)}–${fmt(eHi, 1)}</span>${statusChip(ecL, ecL ? (e > eHi ? 'крепкий' : 'слабый') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">Свет</span><span class="val">${L > 0.15 ? (lampIsOn(t) ? 'лампа' : 'окно') : 'темно'}</span><span class="sub">сегодня ${fmt(lightT, 1)} ч, вчера ${fmt(S.lightYesterday, 1)} ч</span>${statusChip(lightL, lightL ? 'мало' : 'цель 12–14 ч')}</div>
+    <div class="gauge"><span class="lbl">Воздух</span><span class="val">${fmt(T, 1)} °С</span><span class="sub">норма +16…+20 °С${t < S.ventUntil ? ' · проветриваем' : ''}</span>${statusChip(TL, TL ? (T < 16 ? 'прохладно' : 'жарко') : 'норма')}</div>
+    <div class="gauge"><span class="lbl">Корни</span><span class="val">${S.upgrades.aerator ? 'аэратор' : fmt((1 - f) * 100, 0) + ' %'}</span><span class="sub">${S.upgrades.aerator ? 'пузырьки дают кислород' : 'воздуха в баке над раствором'}</span>${statusChip(problems(t).some((q) => q.k === 'overfill') ? 2 : 0, problems(t).some((q) => q.k === 'overfill') ? 'душно' : 'дышат')}</div>`);
+
+  // действия
+  const canCut = !p.dead && !p.exhausted && p.growth >= 75;
+  const needSow = p.dead || p.exhausted;
+  const lampLbl = lampAuto() ? 'Лампа: таймер' : (S.lampOn ? 'Выключить лампу' : 'Включить лампу');
+  setHTML($('actions'), `
+    <button class="act" data-act="water">${I.water}Долить воду</button>
+    <button class="act" data-act="feed">${I.feed}Удобрение</button>
+    <button class="act" data-act="phDown">${I.phDown}pH−</button>
+    <button class="act" data-act="phUp">${I.phUp}pH+</button>
+    <button class="act ${lampIsOn(t) ? 'on' : ''}" data-act="lamp" aria-pressed="${lampIsOn(t)}">${I.lamp}${lampLbl}</button>
+    <button class="act" data-act="vent">${I.vent}Проветрить</button>
+    <button class="act" data-act="solution">${I.swap}Новый раствор<span class="price">5 ${I.leaf}</span></button>
+    ${needSow
+      ? `<button class="act primary" data-act="sow">${I.seed}Посеять</button>`
+      : `<button class="act ${canCut ? 'primary' : ''}" data-act="cut" ${canCut ? '' : 'disabled'}>${I.cut}Срезать урожай</button>`}`);
+}
+
+function normalize(s) { return String(s).toUpperCase().replace(/Ё/g, 'Е').replace(/[^А-ЯA-Z]/g, ''); }
+
+function renderTasks() {
+  const tabs = [['rebus', 'Ребусы'], ['quiz', 'Викторина'], ['riddle', 'Загадки'], ['ach', 'Достижения']];
+  $('taskSeg').innerHTML = tabs.map(([k, n]) => `<button data-ttab="${k}" aria-pressed="${taskTab === k}">${n}</button>`).join('');
+  const body = $('taskBody');
+  if (taskTab === 'rebus') {
+    const solvedN = REBUSES.filter((r) => S.solved[r.id]).length;
+    body.innerHTML = `<p class="muted" style="margin:0">Запятая перед картинкой — убери первую букву слова, после картинки — последнюю. Сколько запятых, столько букв. Отгадано: ${solvedN} из ${REBUSES.length}. Награда: 15 ${I.leaf.replace('<svg', '<svg width="14" height="14" style="vertical-align:-2px"')}</p>` +
+      REBUSES.map((r, i) => {
+        const done = S.solved[r.id];
+        const parts = r.parts.map((pt) => pt.t
+          ? `<span class="rpart"><span class="let">${pt.t}</span></span>`
+          : `<span class="rpart">${pt.start ? `<span class="com">${','.repeat(pt.start)}</span>` : ''}<span class="pic" role="img" aria-label="картинка">${pt.e}</span>${pt.end ? `<span class="com">${','.repeat(pt.end)}</span>` : ''}</span>`).join('<span class="rplus">+</span>');
+        const hint = S.hints[r.id] ? `<p class="muted" style="margin:0">Подсказка: ${r.parts.filter((pt) => pt.e).map((pt) => `${pt.e} — ${pt.w}`).join(', ')}</p>` : '';
+        return `<div class="card"><div class="row"><h3>Ребус ${i + 1}</h3>${done ? '<span class="done-badge">Отгадан</span>' : ''}</div>
+          <div class="rebus">${parts}</div>${hint}
+          ${done
+            ? `<p style="margin:0"><b>${r.a[0]}.</b> ${r.fact}</p>`
+            : `<form class="answer" data-rebus="${r.id}"><input id="in-${r.id}" autocomplete="off" autocapitalize="characters" placeholder="Ответ" aria-label="Ответ на ребус ${i + 1}"><button class="btn">Проверить</button></form>
+               ${S.hints[r.id] ? '' : `<button class="btn ghost" data-hint="${r.id}">Подсказка за 3 листика</button>`}`}
+        </div>`;
+      }).join('');
+  } else if (taskTab === 'quiz') {
+    const left = QUIZ.map((q, i) => i).filter((i) => !S.solved['q' + i]);
+    if (!left.length) {
+      body.innerHTML = '<div class="card"><h3>Все вопросы пройдены!</h3><p class="muted" style="margin:0">Ты настоящий знаток гидропоники.</p></div>';
+      return;
+    }
+    if (quizIdx === null || S.solved['q' + quizIdx]) quizIdx = left[0];
+    const q = QUIZ[quizIdx];
+    body.innerHTML = `<div class="card"><div class="row"><h3>Вопрос</h3><span class="muted">Осталось: ${left.length} · награда 5 листиков</span></div>
+      <p style="margin:0;font-weight:700">${q.q}</p>
+      <div class="opts">${q.o.map((o, i) => `<button data-opt="${i}" class="${quizPicked === null ? '' : i === q.a ? 'right' : i === quizPicked ? 'wrong' : ''}" ${quizPicked === null ? '' : 'disabled'}>${o}</button>`).join('')}</div>
+      ${quizPicked === null ? '' : `<p style="margin:0">${quizPicked === q.a ? '<b>Верно!</b> ' : '<b>Не совсем.</b> '}${q.e}</p><button class="btn" data-next>Следующий вопрос</button>`}</div>`;
+  } else if (taskTab === 'riddle') {
+    body.innerHTML = RIDDLES.map((r, i) => {
+      const done = S.solved[r.id];
+      return `<div class="card"><div class="row"><h3>Загадка ${i + 1}</h3>${done ? '<span class="done-badge">Отгадана</span>' : '<span class="muted">награда 10 листиков</span>'}</div>
+        <p class="riddle" style="margin:0">${r.q}</p>
+        ${done ? `<p style="margin:0">Ответ: <b>${r.a[0].toLowerCase()}</b></p>`
+          : `<form class="answer" data-riddle="${r.id}"><input id="in-${r.id}" autocomplete="off" placeholder="Ответ" aria-label="Ответ на загадку ${i + 1}"><button class="btn">Проверить</button></form>
+             ${S.hints[r.id] ? `<p class="muted" style="margin:0">Подсказка: ${r.hint}</p>` : `<button class="btn ghost" data-hint="${r.id}">Подсказка за 3 листика</button>`}`}
+      </div>`;
+    }).join('');
+  } else {
+    body.innerHTML = ACHIEVEMENTS.map((a) => `<div class="card"><div class="row"><h3>${a.name}</h3>${S.ach[a.id] ? '<span class="done-badge">Получено</span>' : `<span class="price">+${a.r} ${I.leaf}</span>`}</div><p class="muted" style="margin:0">${a.d}</p></div>`).join('');
+  }
+}
+
+function renderShop() {
+  setHTML($('shop'), SHOP.map((u) => {
+    const have = S.upgrades[u.id];
+    return `<div class="card item"><div class="ico">${u.ico}</div><div><h3>${u.name}</h3><p>${u.d}</p>
+      <div class="row"><span class="price">${u.price} ${I.leaf}</span>
+      ${have ? '<span class="done-badge">Уже в огороде</span>' : `<button class="btn ${S.coins >= u.price ? 'violet' : 'ghost'}" data-buy="${u.id}">Купить</button>`}</div></div></div>`;
+  }).join(''));
+}
+function renderTips() {
+  $('tips').innerHTML = TIPS.map((g) => `<div class="card"><h3>${g.h}</h3><ul>${g.items.map((x) => `<li>${x}</li>`).join('')}</ul></div>`).join('');
+}
+function renderMore() {
+  setHTML($('stats'), `<div><b>${S.stats.grams}</b><span>граммов рукколы</span></div><div><b>${S.stats.harvests}</b><span>срезов</span></div><div><b>${Object.keys(S.upgrades).length}/${SHOP.length}</b><span>улучшений</span></div>`);
+  setHTML($('modes'), SPEEDS.map((s) => `<button data-speed="${s.v}" aria-pressed="${S.speed === s.v}"><b>${s.name}</b><span>${s.hint}</span></button>`).join(''));
+  setHTML($('log'), S.log.length ? S.log.map((l) => {
+    const d = new Date(l.t);
+    return `<div><time>${d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${l.text}</span></div>`;
+  }).join('') : '<span class="muted">Пока пусто.</span>');
+}
+function renderTabs() {
+  const anyNew = REBUSES.some((r) => !S.solved[r.id]) && S.coins < 30;
+  const tabs = [['garden', 'Огород', I.garden], ['tasks', 'Задания', I.tasks], ['shop', 'Улучшения', I.shop], ['tips', 'Советы', I.tips], ['more', 'Ещё', I.more]];
+  setHTML($('tabs'), tabs.map(([k, n, ic]) => `<button class="tab" data-view="${k}" ${view === k ? 'aria-current="page"' : ''}>${ic}${n}${k === 'tasks' && anyNew && view !== 'tasks' ? '<i class="dot"></i>' : ''}</button>`).join(''));
+}
+function render() {
+  setHTML($('coins'), `${I.leaf}<span>${S.coins}</span>`);
+  const sp = SPEEDS.find((s) => s.v === S.speed);
+  $('subtitle').textContent = sp && S.speed > 1 ? `Режим: ${sp.name.toLowerCase()}` : 'Руккола без почвы · реальное время';
+  ['garden', 'tasks', 'shop', 'tips', 'more'].forEach((v) => { $('view-' + v).hidden = v !== view; });
+  renderTabs();
+  if (view === 'garden') { renderGarden(); drawScene(); }
+  if (view === 'shop') renderShop();
+  if (view === 'more') renderMore();
+}
+function go(v) {
+  view = v;
+  if (v === 'tasks') renderTasks();
+  if (v === 'tips') renderTips();
+  render();
+  window.scrollTo(0, 0);
+}
+// Кнопка «Назад» в Android-приложении
+window.gameBack = () => {
+  if (!$('modalBg').hidden) { closeModal(); return true; }
+  if (view !== 'garden') { go('garden'); return true; }
+  return false;
+};
+
+// ===================== СОБЫТИЯ =====================
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.view) return go(b.dataset.view);
+  if (b.dataset.act) { tick(); ACTIONS[b.dataset.act](); checkAchievements(); save(); render(); return; }
+  if (b.dataset.buy) return buy(b.dataset.buy);
+  if (b.dataset.ttab) { taskTab = b.dataset.ttab; quizPicked = null; renderTasks(); return; }
+  if (b.dataset.hint) {
+    if (S.coins < 3) return toast('Нужно 3 листика на подсказку.');
+    S.coins -= 3; S.hints[b.dataset.hint] = true; save(); render(); renderTasks(); return;
+  }
+  if (b.dataset.opt !== undefined) {
+    quizPicked = +b.dataset.opt;
+    const q = QUIZ[quizIdx];
+    if (quizPicked === q.a) { S.solved['q' + quizIdx] = true; S.coins += 5; S.stats.tasks += 1; toast('Верно! +5 листиков'); checkAchievements(); save(); render(); }
+    renderTasks(); return;
+  }
+  if (b.hasAttribute('data-next')) {
+    const left = QUIZ.map((q, i) => i).filter((i) => !S.solved['q' + i]);
+    if (left.length) { const pos = left.indexOf(quizIdx); quizIdx = left[(pos + 1) % left.length]; }
+    quizPicked = null; renderTasks(); return;
+  }
+  if (b.dataset.speed) { setSpeed(+b.dataset.speed); save(); render(); toast(`Режим «${SPEEDS.find((s) => s.v === S.speed).name}».`); return; }
+  if (b.id === 'howBtn') return showIntro();
+  if (b.id === 'resetBtn') { $('resetConfirm').hidden = false; return; }
+  if (b.id === 'resetNo') { $('resetConfirm').hidden = true; return; }
+  if (b.id === 'resetYes') { S = newState(Date.now()); $('resetConfirm').hidden = true; save(); go('garden'); showIntro(); return; }
+});
+document.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const id = f.dataset.rebus || f.dataset.riddle;
+  const list = f.dataset.rebus ? REBUSES : RIDDLES;
+  const item = list.find((x) => x.id === id);
+  const val = normalize($('in-' + id).value);
+  if (!val) return;
+  if (item.a.some((a) => normalize(a) === val)) {
+    const reward = f.dataset.rebus ? 15 : 10;
+    S.solved[id] = true; S.coins += reward; S.stats.tasks += 1;
+    addLog(S.gameTime, `${f.dataset.rebus ? 'Отгадан ребус' : 'Отгадана загадка'}: «${item.a[0].toLowerCase()}».`);
+    toast(`Правильно! +${reward} листиков`);
+    checkAchievements(); save(); render(); renderTasks();
+  } else {
+    toast('Пока не то. Попробуй ещё раз!');
+    $('in-' + id).select();
+  }
+});
+
+function showIntro() {
+  openModal(`<h2>Гидро-огород</h2>
+    <p style="margin:0">Вырасти рукколу без почвы — в эко-боксе на подоконнике обычной квартиры. Растение растёт в реальном времени, даже когда игра закрыта.</p>
+    <ul>
+      <li>Следи за раствором: уровень, кислотность (pH) и крепость (EC).</li>
+      <li>Включай фитолампу на 12–14 часов, ночью выключай.</li>
+      <li>Держи прохладу +16…+20 °С и не заливай корни до крышки — им нужен воздух.</li>
+      <li>Отгадывай ребусы, загадки и вопросы — получай листики и покупай улучшения.</li>
+    </ul>
+    <h3>Выбери скорость времени</h3>
+    <div class="modes">${SPEEDS.map((s) => `<button data-mode="${s.v}" aria-pressed="${S.speed === s.v}"><b>${s.name}</b><span>${s.hint}</span></button>`).join('')}</div>
+    <p class="muted" style="margin:0">Скорость можно поменять во вкладке «Ещё».</p>`);
+}
+
+// ===================== ЗАПУСК =====================
+function start(data) {
+  S = load(data && data.state);
+  const now = Date.now();
+  const away = now - S.lastReal;
+  const before = { health: S.plant.health, water: S.water, growth: S.plant.growth };
+  tick();
+  if (away > 30 * 60e3 && S.seenIntro) {
+    const g = S.plant.growth - before.growth;
+    toast(`Пока тебя не было: руккола подросла на ${fmt(Math.max(0, g), 0)}%, выпила ${fmt(Math.max(0, before.water - S.water), 2)} л раствора.`);
+  }
+  // ежедневный бонус
+  const today = new Date().toDateString();
+  if (S.bonusDay !== today) {
+    if (S.bonusDay) { S.coins += 3; setTimeout(() => toast('Ежедневный бонус за заботу об огороде: +3 листика'), 3800); }
+    S.bonusDay = today; save();
+  }
+  go('garden');
+  if (!S.seenIntro) showIntro();
+  setInterval(tick, 1000);
+  const loop = () => {
+    anim += 1;
+    if (view === 'garden' && !document.hidden && (S.upgrades.aerator || S.upgrades.fan || S.heatUntil > S.gameTime)) drawScene();
+    requestAnimationFrame(loop);
+  };
+  if (!reduceMotion) requestAnimationFrame(loop);
+  window.addEventListener('resize', () => { if (view === 'garden') drawScene(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+  if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ state: S }));
+}
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
+else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>

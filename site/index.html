@@ -1,0 +1,450 @@
+<title>Руккола: проект кружка</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@400;600;800&display=swap">
+<style>
+/* Макет: журнальная страница-визитка. Крупный шрифтовой заголовок с ботанической иллюстрацией,
+   дальше полосы-разделы на одной сетке: факты → польза → гидропоника → рост → опыт → памятка → игра */
+:root {
+  --bg: #f3f6ec;
+  --surface: #ffffff;
+  --ink: #142a17;
+  --muted: #4c5f4f;
+  --line: #d6e0cd;
+  --leaf: #2f6b2c;
+  --leaf-2: #5b9a40;
+  --leaf-soft: #e3eedb;
+  --vein: #6b3fa0;
+  --vein-soft: #eee6f7;
+  --petal: #f1e7c4;
+  --water: #2b7fae;
+  --water-soft: #dcecf5;
+  --font-display: 'Unbounded', 'Manrope', system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1910; --surface: #152418; --ink: #e5eee0; --muted: #a5b6a4; --line: #283a2b;
+    --leaf: #93cf73; --leaf-2: #6fb552; --leaf-soft: #1d3221; --vein: #bb98e8; --vein-soft: #2a2238;
+    --petal: #e9dcaa; --water: #6fb4dc; --water-soft: #16303d; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1910; --surface: #152418; --ink: #e5eee0; --muted: #a5b6a4; --line: #283a2b;
+  --leaf: #93cf73; --leaf-2: #6fb552; --leaf-soft: #1d3221; --vein: #bb98e8; --vein-soft: #2a2238;
+  --petal: #e9dcaa; --water: #6fb4dc; --water-soft: #16303d; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 500 17px/1.6 var(--font-body); }
+a { color: var(--leaf); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--vein); outline-offset: 3px; border-radius: 6px; }
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+section { padding-block: 56px; border-top: 1px solid var(--line); }
+.kicker { font: 700 12px/1.2 var(--font-body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--vein); margin: 0 0 12px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(26px, 4vw, 40px); line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; max-width: 22ch; }
+h3 { font-size: 18px; line-height: 1.3; font-weight: 600; }
+p { margin: 0; }
+.lede { font-size: 19px; color: var(--muted); max-width: 62ch; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.stack { display: grid; gap: 16px; min-width: 0; }
+
+/* Шапка */
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; flex-wrap: wrap; }
+.nav .mark { font: 800 15px var(--font-display); color: var(--leaf); text-decoration: none; letter-spacing: 0.02em; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; font-weight: 700; font-size: 14px; }
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--leaf); }
+
+/* Обложка */
+.hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 24px; align-items: center; padding-block: 24px 56px; }
+.hero h1 {
+  font-size: clamp(50px, 8.2vw, 104px); line-height: 0.9; font-weight: 800; letter-spacing: -0.045em; color: var(--leaf);
+}
+.hero h1 span { display: block; font: 400 clamp(15px, 1.8vw, 19px)/1.4 var(--font-body); letter-spacing: 0; color: var(--muted); margin-top: 18px; }
+.latin { font-style: italic; color: var(--vein); font-weight: 600; }
+.hero h1 .latin { display: inline; margin: 0; font: italic 600 1em/1 var(--font-body); color: var(--vein); }
+.hero .lede { margin-top: 22px; }
+.hero-art { width: 100%; max-width: 420px; justify-self: center; }
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); overflow: hidden; }
+.fact { padding: 18px 18px 16px; border-left: 1px solid var(--line); display: grid; gap: 4px; }
+.fact:first-child { border-left: 0; }
+.fact b { font: 800 clamp(24px, 3vw, 32px)/1 var(--font-display); color: var(--leaf); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.fact span { font-size: 14px; color: var(--muted); line-height: 1.35; }
+
+/* Ботаника */
+.specimen { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; display: grid; gap: 10px; }
+.specimen dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; font-size: 15px; }
+.specimen dt { color: var(--muted); font-weight: 600; }
+.specimen dd { margin: 0; font-weight: 700; }
+
+/* Польза */
+.bars { display: grid; gap: 14px; }
+.bar-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 64px; gap: 12px; align-items: center; font-size: 15px; }
+.bar-row .name { font-weight: 700; }
+.bar-row .name small { display: block; font-weight: 500; color: var(--muted); font-size: 13px; }
+.track { height: 14px; border-radius: 99px; background: var(--leaf-soft); overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: 99px; background: var(--leaf-2); }
+.bar-row.top .track i { background: var(--vein); }
+.bar-row .pct { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+.note { font-size: 13px; color: var(--muted); }
+
+/* Гидропоника */
+.scheme { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 12px; }
+.scheme svg { display: block; width: 100%; height: auto; }
+.points { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.points li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; }
+.points .n { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 700 14px var(--font-display); background: var(--water-soft); color: var(--water); }
+.points b { display: block; }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.compare div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 15px; }
+.compare h3 { font-size: 15px; margin-bottom: 6px; }
+.compare ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+
+/* Рост */
+.timeline { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; position: relative; }
+.timeline::before { content: ""; position: absolute; left: 0; right: 0; top: 70px; height: 2px; background: var(--line); }
+.timeline li { display: grid; grid-template-rows: 56px 30px auto; gap: 8px; padding-right: 14px; position: relative; }
+.timeline .day { font: 800 13px var(--font-display); color: var(--vein); align-self: end; }
+.timeline .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--leaf); border: 3px solid var(--bg); box-shadow: 0 0 0 2px var(--leaf); margin-top: 6px; position: relative; z-index: 1; }
+.timeline .sprout { height: 56px; display: flex; align-items: flex-end; }
+.timeline h3 { font-size: 15px; }
+.timeline p { font-size: 14px; color: var(--muted); }
+
+/* Опыт */
+.boxes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: grid; gap: 10px; }
+.box .tag { justify-self: start; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+.box.soil .tag { background: #ece3d6; color: #6b4e2e; }
+.box.hydro .tag { background: var(--water-soft); color: var(--water); }
+.box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
+.measure { display: flex; flex-wrap: wrap; gap: 8px; }
+.measure span { border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; font-size: 14px; font-weight: 700; background: var(--surface); }
+
+/* Памятка */
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: baseline; padding-block: 10px; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s, decimal-leading-zero); font: 800 18px var(--font-display); color: var(--leaf-2); font-variant-numeric: tabular-nums; }
+
+/* Игра */
+.game { background: var(--leaf); color: #f4f9ef; border-radius: 26px; padding: 36px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 32px; align-items: center; }
+.game h2 { color: #ffffff; }
+.game .kicker { color: #e6d7fb; }
+.game p { color: #e2eedb; }
+.game ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: #e2eedb; }
+.btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 12px; padding: 13px 18px; font-weight: 800; text-decoration: none; font-size: 15px; }
+.btn.primary { background: #ffffff; color: #1f4d1d; }
+.btn.secondary { background: transparent; color: #ffffff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.6); }
+.phone { justify-self: center; width: min(240px, 100%); aspect-ratio: 9 / 18; border-radius: 30px; background: #18301e; padding: 10px; box-shadow: 0 20px 40px rgba(0,0,0,.25); }
+.phone canvas { width: 100%; height: 100%; border-radius: 22px; display: block; background: #e7ece3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .game { background: #1f4a1d; } }
+:root[data-theme="dark"] .game { background: #1f4a1d; }
+
+footer { padding-block: 40px 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; display: grid; gap: 6px; }
+footer b { color: var(--ink); }
+
+@media (max-width: 860px) {
+  .hero, .grid-2, .game { grid-template-columns: minmax(0, 1fr); }
+  .hero-art { max-width: 300px; order: -1; }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fact:nth-child(3) { border-left: 0; }
+  .fact:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .timeline { grid-template-columns: minmax(0, 1fr); }
+  .timeline::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+  .timeline li { grid-template-columns: 16px minmax(0, 1fr); grid-template-rows: auto; column-gap: 16px; padding: 0 0 22px; }
+  .timeline .sprout { display: none; }
+  .timeline .dot { grid-row: 1 / span 3; margin-top: 2px; }
+  .timeline .day, .timeline h3, .timeline p { grid-column: 2; }
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .game { padding: 26px 20px; }
+}
+@media (max-width: 560px) {
+  section { padding-block: 40px; }
+  .boxes, .compare { grid-template-columns: minmax(0, 1fr); }
+  .bar-row { grid-template-columns: 112px minmax(0, 1fr) 48px; font-size: 14px; }
+  .nav ul { gap: 12px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-art .leafsway { transform-origin: 210px 380px; animation: sway 6s ease-in-out infinite; }
+  @keyframes sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+}
+</style>
+
+<div class="wrap">
+  <nav class="nav" aria-label="Разделы сайта">
+    <a class="mark" href="#top">РУККОЛА · ПРОЕКТ</a>
+    <ul>
+      <li><a href="#plant">Растение</a></li>
+      <li><a href="#benefit">Польза</a></li>
+      <li><a href="#hydro">Гидропоника</a></li>
+      <li><a href="#memo">Памятка</a></li>
+      <li><a href="#game">Игра</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero" id="top">
+    <div>
+      <p class="kicker">Проект кружка · 6 класс · 2026</p>
+      <h1>Руккола<span>индау посевной, <i class="latin">Eruca sativa</i></span></h1>
+      <p class="lede">Пряная зелень с ореховым вкусом, которую мы вырастили зимой прямо в классе — в эко-боксах, в почве и на гидропонике, без огорода и без почвы.</p>
+    </div>
+    <svg class="hero-art" viewBox="0 0 420 460" role="img" aria-label="Рисунок: лист рукколы и цветок с фиолетовыми жилками">
+      <g class="leafsway">
+        <path d="M210 440 C206 360 200 300 196 230" fill="none" stroke="var(--leaf)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M196 236 C150 226 120 236 104 214 C128 204 150 206 166 212 C132 190 108 168 104 140 C132 142 154 158 170 178 C150 140 148 104 160 72 C184 92 194 124 194 156 C200 118 216 84 246 62 C258 98 248 134 226 168 C246 148 274 136 304 138 C298 170 270 192 236 200 C262 196 290 202 308 222 C276 240 236 240 196 236 Z" fill="var(--leaf-2)"/>
+        <path d="M196 236 C190 190 186 140 194 92 M194 160 C176 150 150 140 130 146 M196 200 C168 196 140 196 122 210 M198 184 C222 170 250 160 276 158 M198 214 C230 210 260 214 286 222" fill="none" stroke="var(--leaf)" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+      </g>
+      <g transform="translate(300 300)">
+        <path d="M0 140 C4 90 2 50 -6 0" fill="none" stroke="var(--leaf)" stroke-width="4" stroke-linecap="round"/>
+        <g transform="translate(-6 0)">
+          <ellipse cx="0" cy="-26" rx="13" ry="24" fill="var(--petal)"/>
+          <ellipse cx="0" cy="26" rx="13" ry="24" fill="var(--petal)"/>
+          <ellipse cx="-26" cy="0" rx="24" ry="13" fill="var(--petal)"/>
+          <ellipse cx="26" cy="0" rx="24" ry="13" fill="var(--petal)"/>
+          <path d="M0 -6 V-42 M0 6 V42 M-6 0 H-42 M6 0 H42 M-4 -18 l4 -10 4 10 M-4 18 l4 10 4 -10 M-18 -4 l-10 4 10 4 M18 -4 l10 4 -10 4" stroke="var(--vein)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <circle r="7" fill="var(--vein)"/>
+        </g>
+      </g>
+      <text x="300" y="456" text-anchor="middle" font-family="Manrope, sans-serif" font-size="13" fill="var(--muted)">цветок рукколы</text>
+    </svg>
+  </header>
+
+  <div class="facts" role="list">
+    <div class="fact" role="listitem"><b>25 ккал</b><span>в 100 г листьев</span></div>
+    <div class="fact" role="listitem"><b>20–30</b><span>дней от посева до урожая</span></div>
+    <div class="fact" role="listitem"><b>+16…+20 °С</b><span>любимая температура</span></div>
+    <div class="fact" role="listitem"><b>12–14 ч</b><span>света в сутки</span></div>
+  </div>
+
+  <section id="plant" style="border-top:0">
+    <div class="grid-2">
+      <div class="stack">
+        <p class="kicker">Растение</p>
+        <h2>Родственница капусты из Древнего Рима</h2>
+        <p>Руккола — однолетнее растение семейства Капустные. Её ближайшие родственники — капуста, редис, горчица и кресс-салат. Родом она из Средиземноморья, её выращивали ещё в Древнем Риме, а сегодня без неё не обходится итальянская кухня.</p>
+        <p>Руккола образует розетку из сочных рассечённых листьев длиной 10–20 см. Цветки бледно-жёлтые с фиолетовыми жилками. В жару или при слишком длинном дне растение выпускает цветонос — «стрелкуется», и листья начинают горчить.</p>
+      </div>
+      <div class="specimen" aria-label="Ботаническая карточка">
+        <p class="kicker" style="margin:0">Ботаническая карточка</p>
+        <dl>
+          <dt>Название</dt><dd>Индау посевной (руккола, эрука)</dd>
+          <dt>Латынь</dt><dd class="latin">Eruca sativa</dd>
+          <dt>Семейство</dt><dd>Капустные (Крестоцветные)</dd>
+          <dt>Родина</dt><dd>Средиземноморье</dd>
+          <dt>Жизнь</dt><dd>Однолетник</dd>
+          <dt>Всходы</dt><dd>через 3–5 дней</dd>
+          <dt>Прорастает</dt><dd>уже при +5…+6 °С</dd>
+          <dt>Урожай</dt><dd>через 20–30 дней, срезать можно 2–3 раза</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="benefit">
+    <div class="grid-2">
+      <div class="stack">
+        <p class="kicker">Польза</p>
+        <h2>Почти дневная норма витамина K в одной тарелке</h2>
+        <p>В 100 г рукколы около 109 мкг витамина K — это 91 % того, что нужно взрослому человеку за день. Он помогает крови сворачиваться и делает кости крепче. А кальция в рукколе больше, чем в молоке: 160 мг против примерно 120 мг.</p>
+        <p class="note">Состав: USDA FoodData Central, «Arugula, raw». Нормы для взрослых: МР 2.3.1.0253-21.</p>
+      </div>
+      <div class="stack">
+        <h3>Сколько дневной нормы взрослого даёт 100 г рукколы</h3>
+        <div class="bars">
+          <div class="bar-row top"><span class="name">Витамин K<small>109 мкг</small></span><span class="track"><i style="width:91%"></i></span><span class="pct">91 %</span></div>
+          <div class="bar-row"><span class="name">Фолаты (B9)<small>97 мкг</small></span><span class="track"><i style="width:24%"></i></span><span class="pct">24 %</span></div>
+          <div class="bar-row"><span class="name">Кальций<small>160 мг</small></span><span class="track"><i style="width:16%"></i></span><span class="pct">16 %</span></div>
+          <div class="bar-row"><span class="name">Витамин C<small>15 мг</small></span><span class="track"><i style="width:15%"></i></span><span class="pct">15 %</span></div>
+          <div class="bar-row"><span class="name">Витамин A<small>119 мкг</small></span><span class="track"><i style="width:13%"></i></span><span class="pct">13 %</span></div>
+          <div class="bar-row"><span class="name">Калий<small>369 мг</small></span><span class="track"><i style="width:11%"></i></span><span class="pct">11 %</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hydro">
+    <div class="grid-2">
+      <div class="stack">
+        <p class="kicker">Эко-бокс и гидропоника</p>
+        <h2>Как вырастить зелень совсем без почвы</h2>
+        <p>Гидропоника — выращивание растений в питательном растворе вместо земли. Мы выбрали самый простой способ — метод Кратки: без насосов и без электричества, кроме фитолампы.</p>
+        <ol class="points">
+          <li><span class="n">1</span><span><b>Горшочек-сеточка с субстратом</b>Кокосовое волокно держит семена и растение, как опора.</span></li>
+          <li><span class="n">2</span><span><b>Питательный раствор</b>Вода с минеральным удобрением: pH 6,0–6,8, концентрация 0,8–1,6 мСм/см.</span></li>
+          <li><span class="n">3</span><span><b>Воздушный зазор</b>Растение пьёт раствор, уровень опускается. Верхние корни дышат, нижние пьют.</span></li>
+          <li><span class="n">4</span><span><b>Непрозрачный контейнер</b>На свету в растворе разводятся водоросли, поэтому бак закрыт от света.</span></li>
+        </ol>
+      </div>
+      <div class="stack">
+        <div class="scheme">
+          <svg viewBox="0 0 400 330" role="img" aria-label="Схема эко-бокса по методу Кратки: лампа, руккола, крышка с горшочками, воздушный зазор, корни в растворе">
+            <rect x="110" y="16" width="180" height="14" rx="5" fill="var(--muted)"/>
+            <rect x="116" y="30" width="168" height="4" rx="2" fill="#f0c04a"/>
+            <path d="M120 36 L80 150 M200 36 V140 M280 36 L320 150" stroke="#f0c04a" stroke-width="3" stroke-dasharray="6 6"/>
+            <rect x="80" y="196" width="240" height="110" fill="var(--water-soft)"/>
+            <rect x="80" y="240" width="240" height="66" fill="var(--water)" opacity=".35"/>
+            <line x1="80" y1="240" x2="320" y2="240" stroke="var(--water)" stroke-width="2"/>
+            <g stroke="#d9c79c" stroke-width="2" fill="none" stroke-linecap="round">
+              <path d="M140 220 c-4 30 -8 50 -6 74 M146 220 c2 30 6 50 2 70 M150 220 c6 28 10 46 12 66 M136 220 c-8 26 -14 40 -16 60"/>
+              <path d="M200 220 c-4 30 -8 50 -6 74 M206 220 c2 30 6 50 2 70 M210 220 c6 28 10 46 12 66 M196 220 c-8 26 -14 40 -16 60"/>
+              <path d="M260 220 c-4 30 -8 50 -6 74 M266 220 c2 30 6 50 2 70 M270 220 c6 28 10 46 12 66 M256 220 c-8 26 -14 40 -16 60"/>
+            </g>
+            <path d="M80 196 V306 H320 V196" fill="none" stroke="var(--ink)" stroke-width="7"/>
+            <rect x="70" y="188" width="260" height="10" rx="3" fill="var(--muted)"/>
+            <g fill="#8d6e4a"><path d="M128 186 h30 l-6 34 h-18z"/><path d="M188 186 h30 l-6 34 h-18z"/><path d="M248 186 h30 l-6 34 h-18z"/></g>
+            <g fill="var(--leaf-2)">
+              <path d="M143 186 c-20 -10 -34 -30 -34 -52 c16 6 28 22 34 52z M143 186 c-4 -26 0 -52 12 -70 c8 22 4 46 -12 70z M143 186 c14 -18 32 -28 50 -28 c-8 18 -26 28 -50 28z"/>
+              <path d="M203 186 c-20 -10 -34 -30 -34 -52 c16 6 28 22 34 52z M203 186 c-4 -26 0 -52 12 -70 c8 22 4 46 -12 70z M203 186 c14 -18 32 -28 50 -28 c-8 18 -26 28 -50 28z"/>
+              <path d="M263 186 c-20 -10 -34 -30 -34 -52 c16 6 28 22 34 52z M263 186 c-4 -26 0 -52 12 -70 c8 22 4 46 -12 70z M263 186 c14 -18 32 -28 50 -28 c-8 18 -26 28 -50 28z"/>
+            </g>
+            <g font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="var(--ink)">
+              <text x="296" y="20">фитолампа</text>
+              <text x="8" y="150">руккола</text>
+              <path d="M58 154 L110 166" stroke="var(--muted)" stroke-width="1.2"/>
+              <text x="326" y="222">воздух</text>
+              <path d="M322 218 L300 220" stroke="var(--muted)" stroke-width="1.2"/>
+              <text x="326" y="280">раствор</text>
+              <path d="M322 276 L300 276" stroke="var(--muted)" stroke-width="1.2"/>
+              <text x="8" y="270">корни</text>
+              <path d="M46 266 L128 262" stroke="var(--muted)" stroke-width="1.2"/>
+            </g>
+          </svg>
+        </div>
+        <div class="compare">
+          <div><h3>Плюсы гидропоники</h3><ul><li>растёт быстрее</li><li>чисто, без земли</li><li>нет сорняков и почвенных вредителей</li><li>урожай круглый год</li></ul></div>
+          <div><h3>Сложности</h3><ul><li>нужно следить за pH</li><li>нужно измерять раствор</li><li>нужны удобрения и лампа</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="growth">
+    <p class="kicker">Как растёт руккола</p>
+    <h2>От семечка до салата за месяц</h2>
+    <ol class="timeline">
+      <li><span class="sprout"><svg width="40" height="20" viewBox="0 0 40 20" aria-hidden="true"><ellipse cx="20" cy="15" rx="6" ry="4" fill="#8d6e4a"/></svg></span><span class="dot"></span><span class="day">День 0</span><h3>Посев</h3><p>Семена кладут на глубину 0,5 см во влажный субстрат.</p></li>
+      <li><span class="sprout"><svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M20 30 V16" stroke="var(--leaf)" stroke-width="2.5"/><ellipse cx="13" cy="14" rx="7" ry="4" fill="var(--leaf-2)"/><ellipse cx="27" cy="14" rx="7" ry="4" fill="var(--leaf-2)"/></svg></span><span class="dot"></span><span class="day">День 3–5</span><h3>Всходы</h3><p>Появляются две круглые семядоли.</p></li>
+      <li><span class="sprout"><svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 40 V18" stroke="var(--leaf)" stroke-width="2.5"/><ellipse cx="12" cy="28" rx="7" ry="4" fill="var(--leaf-2)"/><ellipse cx="28" cy="28" rx="7" ry="4" fill="var(--leaf-2)"/><path d="M20 20 c-3 -8 0 -16 6 -18 c2 8 -1 14 -6 18z" fill="var(--leaf)"/></svg></span><span class="dot"></span><span class="day">День 7–10</span><h3>Первый лист</h3><p>Вырастает первый настоящий, уже рассечённый лист.</p></li>
+      <li><span class="sprout"><svg width="44" height="50" viewBox="0 0 44 50" aria-hidden="true"><g fill="var(--leaf-2)"><path d="M22 50 c-12 -6 -20 -18 -20 -30 c10 4 16 14 20 30z"/><path d="M22 50 c-2 -16 0 -32 8 -44 c4 14 2 28 -8 44z"/><path d="M22 50 c8 -12 18 -18 20 -18 c-4 12 -12 18 -20 18z"/></g></svg></span><span class="dot"></span><span class="day">День 14</span><h3>Розетка</h3><p>4–6 листьев, корни глубоко в растворе.</p></li>
+      <li><span class="sprout"><svg width="50" height="56" viewBox="0 0 50 56" aria-hidden="true"><g fill="var(--leaf-2)"><path d="M25 56 c-16 -6 -24 -22 -24 -38 c12 6 20 18 24 38z"/><path d="M25 56 c-3 -20 0 -40 10 -54 c5 18 2 36 -10 54z"/><path d="M25 56 c10 -16 22 -24 25 -24 c-4 16 -14 24 -25 24z"/><path d="M25 56 c-10 -12 -16 -26 -14 -40 c8 10 12 24 14 40z" fill="var(--leaf)"/></g></svg></span><span class="dot"></span><span class="day">День 20–30</span><h3>Урожай</h3><p>Срезаем внешние листья, сердцевина отрастает снова.</p></li>
+    </ol>
+  </section>
+
+  <section id="experiment">
+    <div class="grid-2">
+      <div class="stack">
+        <p class="kicker">Наш опыт в кружке</p>
+        <h2>Два эко-бокса, одна лампа, один пакет семян</h2>
+        <p>Чтобы сравнение было честным, мы поставили оба эко-бокса рядом под одной фитолампой и посеяли семена из одного пакета. Отличался только способ выращивания. Каждые 2–4 дня мы измеряли растения линейкой и записывали всё в дневник наблюдений.</p>
+        <p class="note">Цифры, графики и выводы — в нашей проектной работе.</p>
+        <div class="measure" aria-label="Что мы сравнивали"><span>всхожесть</span><span>высота</span><span>число листьев</span><span>масса урожая</span><span>затраты</span><span>вкус</span></div>
+      </div>
+      <div class="boxes">
+        <div class="box soil"><span class="tag">Эко-бокс 1</span><h3>В почве</h3><ul><li>керамзит 2 см + грунт 6 см</li><li>полив отстоянной водой</li><li>подкормка раз в неделю</li></ul></div>
+        <div class="box hydro"><span class="tag">Эко-бокс 2</span><h3>На гидропонике</h3><ul><li>метод Кратки, 6 горшочков</li><li>кокосовый субстрат</li><li>контроль pH и EC раз в неделю</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="memo">
+    <p class="kicker">Памятка</p>
+    <h2>Руккола на подоконнике за 10 шагов</h2>
+    <ol class="steps" style="margin-top:28px">
+      <li>Возьми непрозрачный контейнер с крышкой объёмом 2–3 литра.</li>
+      <li>Прорежь в крышке отверстия по размеру горшочков-сеточек.</li>
+      <li>Заполни горшочки кокосовым субстратом или минеральной ватой.</li>
+      <li>Приготовь питательный раствор по инструкции к удобрению; pH — 6,0–6,8.</li>
+      <li>Налей раствор так, чтобы он касался дна горшочков на 0,5–1 см.</li>
+      <li>Посей по 4–5 семян в каждый горшочек на глубину 0,5 см.</li>
+      <li>Включай фитолампу на 12–14 часов в сутки, ночью выключай.</li>
+      <li>Держи эко-бокс в прохладе, +16…+20 °С, подальше от батареи.</li>
+      <li>Раз в неделю доливай раствор, но оставляй воздушный зазор.</li>
+      <li>Через 20–30 дней срезай листья ножницами — руккола отрастёт снова.</li>
+    </ol>
+  </section>
+
+  <section id="game" style="border-top:0">
+    <div class="game">
+      <div class="stack">
+        <p class="kicker">Игра для Android</p>
+        <h2>«Гидро-огород»</h2>
+        <p>Вырасти рукколу без почвы в эко-боксе на подоконнике обычной квартиры. Растение растёт в реальном времени — даже когда игра закрыта.</p>
+        <ul>
+          <li>следи за уровнем раствора, pH, концентрацией, светом и температурой;</li>
+          <li>отгадывай ребусы и загадки о гидропонике, отвечай на вопросы викторины;</li>
+          <li>за листики покупай улучшения: таймер, аэратор, pH-метр, автодолив;</li>
+          <li>все советы в игре — настоящие.</li>
+        </ul>
+        <div class="btns">
+          <a class="btn primary" href="https://claude.ai/artifact/Amb5MoHLtKs1E99JiarGo6" target="_blank" rel="noopener">Играть в браузере</a>
+          <a class="btn secondary" href="https://github.com/Kirill898990/xydem/raw/claude/zealous-franklin-1peppd/apk/gidro-ogorod.apk" target="_blank" rel="noopener">Скачать APK для Android</a>
+        </div>
+        <p class="note" style="color:#cfe0c6">Перед установкой APK разреши в настройках телефона установку из этого источника.</p>
+      </div>
+      <div class="phone" aria-hidden="true"><canvas id="mini" width="220" height="440"></canvas></div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Проект «Выращивание рукколы в эко-боксах в условиях школьного кружка»</b></p>
+    <p>Ученики 6 класса · Республиканская научно-практическая конференция «АгроБудущее: идеи школьников», 2026</p>
+    <p>Источники: USDA FoodData Central; МР 2.3.1.0253-21; B. A. Kratky, Acta Horticulturae, 2009; W. F. Gericke, 1940.</p>
+  </footer>
+</div>
+
+<script>
+// Мини-превью игры в «телефоне»: эко-бокс, в котором руккола растёт по кругу
+(() => {
+  const cv = document.getElementById('mini');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let g = reduce ? 0.85 : 0.1;
+  function leaf(len, w) {
+    ctx.beginPath(); ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(len * 0.3, -w * 0.4, len * 0.45, -w, len * 0.6, -w * 0.4);
+    ctx.bezierCurveTo(len * 0.75, -w * 1.1, len * 0.98, -w * 0.8, len, 0);
+    ctx.bezierCurveTo(len * 0.98, w * 0.8, len * 0.75, w * 1.1, len * 0.6, w * 0.4);
+    ctx.bezierCurveTo(len * 0.45, w, len * 0.3, w * 0.4, 0, 0); ctx.fill();
+  }
+  function draw() {
+    const W = cv.width, H = cv.height;
+    ctx.fillStyle = '#e7ece3'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#18301e'; ctx.font = '700 15px Unbounded, sans-serif'; ctx.fillText('Гидро-огород', 16, 34);
+    ctx.fillStyle = '#9fd0ee'; ctx.fillRect(14, 50, W - 28, 150);
+    ctx.fillStyle = '#ffe39a'; ctx.fillRect(50, 58, W - 100, 6);
+    ctx.fillStyle = '#f4f2ea'; ctx.fillRect(10, 196, W - 20, 10);
+    const bx = 36, bw = W - 72, top = 150, bot = 200;
+    ctx.fillStyle = '#e8eef0'; ctx.fillRect(bx, top, bw, bot - top);
+    const lvl = bot - 4 - (0.85 - 0.5 * g) * (bot - top - 8);
+    ctx.fillStyle = '#9cc8e0'; ctx.fillRect(bx, lvl, bw, bot - lvl);
+    ctx.strokeStyle = '#3b4a52'; ctx.lineWidth = 3; ctx.strokeRect(bx, top, bw, bot - top);
+    [bx + bw * 0.22, bx + bw * 0.5, bx + bw * 0.78].forEach((x, k) => {
+      ctx.fillStyle = '#7c5b45'; ctx.fillRect(x - 9, top - 4, 18, 14);
+      const n = Math.round(2 + g * 8), L = 10 + g * 46;
+      for (let i = 0; i < n; i++) {
+        const side = i % 2 ? 1 : -1, kk = i / Math.max(1, n - 1);
+        ctx.save(); ctx.translate(x, top - 4); ctx.rotate(-Math.PI / 2 + side * (0.15 + (1 - kk)) * 0.75);
+        ctx.fillStyle = i % 3 ? '#4f9a3c' : '#3f8a35'; leaf(L * (0.7 + 0.3 * ((i + k) % 3) / 2), 3 + L * 0.12); ctx.restore();
+      }
+    });
+    const rows = [['Раствор', 'норма'], ['pH', '6,4'], ['EC', '1,2'], ['Свет', '14 ч']];
+    rows.forEach(([a, b], i) => {
+      const y = 226 + i * 46;
+      ctx.fillStyle = '#fbfcf8'; ctx.fillRect(14, y, W - 28, 38);
+      ctx.fillStyle = '#56685b'; ctx.font = '700 11px Manrope, sans-serif'; ctx.fillText(a.toUpperCase(), 24, y + 16);
+      ctx.fillStyle = '#18301e'; ctx.font = '800 15px Manrope, sans-serif'; ctx.fillText(b, 24, y + 33);
+    });
+    ctx.fillStyle = '#3e8e3a'; ctx.fillRect(14, 412, W - 28, 16);
+  }
+  draw();
+  if (!reduce) setInterval(() => { g += 0.01; if (g > 1) g = 0.1; draw(); }, 120);
+})();
+</script>

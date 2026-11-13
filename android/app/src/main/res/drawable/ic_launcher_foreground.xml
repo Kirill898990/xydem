@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Значок: лист рукколы над каплей раствора -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#2C82B0"
+        android:pathData="M54,62 C54,62 42,74 42,80 A12,12 0 0,0 66,80 C66,74 54,62 54,62 Z" />
+    <path
+        android:fillColor="#3E8E3A"
+        android:pathData="M54,64 C50,58 44,56 40,52 C42,50 45,50 47,51 C43,47 40,43 40,38 C43,38 46,40 48,42 C46,37 46,32 48,28 C51,30 53,33 54,37 C55,33 57,30 60,28 C62,32 62,37 60,42 C62,40 65,38 68,38 C68,43 65,47 61,51 C63,50 66,50 68,52 C64,56 58,58 54,64 Z" />
+    <path
+        android:strokeColor="#24572A"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M54,64 L54,36" />
+</vector>

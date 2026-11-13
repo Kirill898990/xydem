@@ -1,6 +1,6 @@
 node_modules/
 *.apk
-!game/*.apk
+!apk/*.apk
 android/.gradle/
 android/build/
 android/app/build/
