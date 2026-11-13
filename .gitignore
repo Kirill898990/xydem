@@ -1,6 +1,6 @@
 node_modules/
 *.apk
-!docs/*.apk
+!/gidro-ogorod.apk
 android/.gradle/
 android/build/
 android/app/build/

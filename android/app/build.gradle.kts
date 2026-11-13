@@ -26,10 +26,10 @@ android {
     }
 }
 
-// Игра хранится в ../docs/game/index.html — тот же файл открывается на сайте (GitHub Pages).
+// Игра хранится в ../game/index.html — тот же файл открывается на сайте (GitHub Pages).
 // Перед сборкой копируем её в assets приложения.
 val prepareGame by tasks.registering(Copy::class) {
-    from(rootProject.file("../docs/game/index.html"))
+    from(rootProject.file("../game/index.html"))
     into(layout.projectDirectory.dir("src/main/assets"))
 }
 tasks.named("preBuild") { dependsOn(prepareGame) }
