@@ -61,11 +61,14 @@ fi
 [ -f "$WEBROOT/index.html" ] || die "в репозитории не найден index.html."
 
 say "3/5 Настраиваю nginx для $DOMAIN"
+# IPv6 слушаем только если он включён на сервере, иначе nginx не запустится
+LISTEN6=""
+[ -f /proc/net/if_inet6 ] && LISTEN6="listen [::]:80;"
 cat > "$SITE_CONF" <<EOF
 # Сайт проекта «Руккола в эко-боксах». Файл создан скриптом deploy/install.sh.
 server {
     listen 80;
-    listen [::]:80;
+    $LISTEN6
     server_name $DOMAIN www.$DOMAIN;
 
     root $WEBROOT;
